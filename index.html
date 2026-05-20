@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>417 Metrics - Система Тестирования</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        :root {
+            --primary-color: var(--primary-color);
+            --dark-primary: var(--dark-primary);
+            --bg-gradient-1: #B71C1C;
+            --bg-gradient-2: #7B1313;
+            --text-color: #333;
+            --bg-color: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        body.dark-mode {
+            --bg-gradient-1: #1a1a1a;
+            --bg-gradient-2: #2d2d2d;
+            --text-color: #e0e0e0;
+            --bg-color: #2d2d2d;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+        }
+
+        body.blue-mode {
+            --primary-color: #1976D2;
+            --dark-primary: #0D47A1;
+            --bg-gradient-1: #0D47A1;
+            --bg-gradient-2: #1565C0;
+            --text-color: #333;
+            --bg-color: #ffffff;
+        }
+
+        body.blue-mode.dark {
+            --text-color: #e0e0e0;
+            --bg-color: #2d2d2d;
+        }
+
+        body.green-mode {
+            --primary-color: #388E3C;
+            --dark-primary: #1B5E20;
+            --bg-gradient-1: #1B5E20;
+            --bg-gradient-2: #2E7D32;
+        }
+
+        body.bw-mode {
+            --primary-color: #000000;
+            --dark-primary: #1a1a1a;
+            --bg-gradient-1: #f5f5f5;
+            --bg-gradient-2: #e0e0e0;
+            --text-color: #000;
+            --bg-color: #ffffff;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-color);
+            border-radius: 15px;
+            box-shadow: 0 20px 60px var(--shadow-color);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-primary) 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .theme-selector {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .theme-btn {
+            padding: 8px 12px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .theme-btn.active {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .theme-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 20px;
+        }
+
+        .test-selector {
+            margin-bottom: 30px;
+        }
+
+        .test-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .test-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .test-selector select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Settings Section */
+        .settings-section {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .settings-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-title::before {
+            content: "⚙️";
+            font-size: 1.2em;
+        }
+
+        .setting-group {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .setting-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .setting-desc {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .select-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .select-option {
+            padding: 8px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+
+        .select-option:hover {
+            border-color: var(--primary-color);
+            background: #ffe6e6;
+        }
+
+        .select-option.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle {
+            width: 50px;
+            height: 28px;
+            background: #ddd;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .toggle.active {
+            background: var(--primary-color);
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s;
+        }
+
+        .toggle.active::after {
+            left: 24px;
+        }
+
+        .question-selector {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+        }
+
+        .question-item {
+            padding: 10px;
+            margin-bottom: 5px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .question-item:hover {
+            background: #f5f5f5;
+        }
+
+        .question-item input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .question-item label {
+            cursor: pointer;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-start {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-primary) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-start:hover {
+            box-shadow: 0 15px 30px rgba(211, 47, 47, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--dark-primary) 100%);
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            background: #f9f9f9;
+            padding: 12px 15px;
+            border-radius: 8px;
+        }
+
+        .progress-item {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .question-block {
+            margin-bottom: 40px;
+        }
+
+        .question-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+
+        .option:hover {
+            border-color: var(--primary-color);
+            background: #ffe6e6;
+            box-shadow: 0 5px 15px rgba(211, 47, 47, 0.2);
+        }
+
+        .option.revealed-correct {
+            border-color: #4caf50;
+            background: #f1f8f4;
+        }
+
+        .option.revealed-incorrect {
+            border-color: #f44336;
+            background: #fef1f0;
+        }
+
+        .correct-badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 10px;
+            font-weight: 600;
+        }
+
+        .incorrect-badge {
+            display: inline-block;
+            background: #f44336;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 10px;
+            font-weight: 600;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .option label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-primary) 100%);
+            color: white;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(211, 47, 47, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(-2px);
+        }
+
+        .btn-back {
+            background: #f0f0f0;
+            color: #333;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .btn-back:hover {
+            background: #e0e0e0;
+        }
+
+        .results-screen {
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            margin: 30px auto;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-primary) 100%);
+            box-shadow: 0 10px 30px rgba(211, 47, 47, 0.3);
+        }
+
+        .results-title {
+            font-size: 2em;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        .results-details {
+            margin: 30px 0;
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .results-details p {
+            margin: 10px 0;
+        }
+
+        .answer-review {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .answer-review-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .answer-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-left: 4px solid #ddd;
+            background: #f9f9f9;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .answer-item.correct {
+            border-left-color: #4caf50;
+            background: #f1f8f4;
+        }
+
+        .answer-item.correct:hover {
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+        }
+
+        .answer-item.incorrect {
+            border-left-color: #f44336;
+            background: #fef1f0;
+        }
+
+        .answer-item.incorrect:hover {
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.2);
+        }
+
+        .answer-item-question {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .answer-item-info {
+            font-size: 0.95em;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .answer-correct {
+            color: #4caf50;
+            font-weight: 600;
+        }
+
+        .answer-incorrect {
+            color: #f44336;
+            font-weight: 600;
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-primary) 100%);
+            color: white;
+            padding: 12px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.2s;
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(211, 47, 47, 0.4);
+        }
+
+        .btn-restart:active {
+            transform: translateY(-2px);
+        }
+
+        body.bw-mode .settings-section {
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+        }
+
+        body.bw-mode .option {
+            border-color: #999;
+        }
+
+        body.bw-mode .option:hover {
+            border-color: #000;
+            background: #f8f8f8;
+        }
+
+        body.bw-mode .select-option {
+            border-color: #999;
+        }
+
+        body.bw-mode .select-option:hover {
+            border-color: #000;
+        }
+
+        body.bw-mode .select-option.active {
+            background: #000;
+            color: white;
+        }
+
+        body.bw-mode .progress-bar {
+            background: #ddd;
+        }
+
+        body.bw-mode .progress-fill {
+            background: #000;
+        }
+
+        body.bw-mode .question-title {
+            border-bottom-color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="theme-selector">
+                <button class="theme-btn" onclick="setTheme('red', 'light')">Красная</button>
+                <button class="theme-btn" onclick="setTheme('blue', 'light')">Синяя</button>
+                <button class="theme-btn" onclick="setTheme('green', 'light')">Зеленая</button>
+                <button class="theme-btn active" onclick="setTheme('bw', 'light')">Ч/Б</button>
+                <button class="theme-btn" onclick="setTheme('red', 'dark')">Темная</button>
+            </div>
+            <h1>417 Metrics</h1>
+            <p>Система тестирования знаний</p>
+        </div>
+
+        <div class="content">
+            <!-- Экран выбора теста -->
+            <div id="testSelector" class="test-selector">
+                <label for="testSelect">Выберите тест:</label>
+                <select id="testSelect" onchange="updateTestInfo()">
+                    <option value="">-- Выберите тест --</option>
+                </select>
+
+                <!-- Settings Section -->
+                <div id="settingsSection" class="settings-section hidden">
+                    <div class="settings-title">Параметры теста</div>
+
+                    <!-- Количество вопросов -->
+                    <div class="setting-group">
+                        <label class="setting-label">📊 Выбор вопросов</label>
+                        <div class="setting-desc" id="totalQuestionsCount"></div>
+
+                        <!-- Режим выбора -->
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer;">
+                                <input type="radio" name="selectMode" value="count" checked onchange="switchMode('count')">
+                                <span>По количеству</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="radio" name="selectMode" value="range" onchange="switchMode('range')">
+                                <span>По диапазону</span>
+                            </label>
+                        </div>
+
+                        <!-- Режим количества -->
+                        <div id="countMode" style="display: block; margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">Сколько вопросов?</label>
+                            <input type="number" id="questionCountInput" min="1" max="100" value="5"
+                                   style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 1em;">
+                        </div>
+
+                        <!-- Режим диапазона -->
+                        <div id="rangeMode" style="display: none;">
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <div style="flex: 1;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">С вопроса:</label>
+                                    <input type="number" id="rangeStart" min="1" value="1"
+                                           style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 1em;">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #555;">По вопрос:</label>
+                                    <input type="number" id="rangeEnd" min="1" value="5"
+                                           style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 1em;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Перемешивание ответов -->
+                    <div class="setting-group">
+                        <label class="setting-label">🔀 Параметры ответов</label>
+                        <div class="toggle-switch">
+                            <div class="toggle" id="shuffleToggle" onclick="toggleShuffle()"></div>
+                            <span>Перемешивать ответы</span>
+                        </div>
+                    </div>
+
+
+                    <!-- Выбор конкретных вопросов -->
+                    <div class="setting-group" id="questionListGroup" style="display: none;">
+                        <label class="setting-label">📋 Выберите вопросы</label>
+                        <div class="question-selector" id="questionSelector"></div>
+                    </div>
+                </div>
+
+                <button class="btn-start" onclick="startTest()">Начать тест</button>
+            </div>
+
+            <!-- Экран с вопросами -->
+            <div id="testScreen" class="hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-info" id="progressInfo"></div>
+                <div class="question-block" id="questionBlock"></div>
+                <div class="btn-group">
+                    <button class="btn btn-back" onclick="goBack()">Назад к выбору</button>
+                    <button class="btn btn-submit" onclick="submitTest()">Завершить тест</button>
+                </div>
+            </div>
+
+            <!-- Экран с результатами -->
+            <div id="resultsScreen" class="hidden">
+                <div class="results-screen">
+                    <h2 class="results-title">Результаты теста</h2>
+                    <div class="score-circle" id="scoreCircle">0%</div>
+                    <div class="results-details">
+                        <p>Правильных ответов: <strong id="correctCount">0</strong></p>
+                        <p>Неправильных ответов: <strong id="incorrectCount">0</strong></p>
+                        <p>Всего вопросов: <strong id="totalCount">0</strong></p>
+                    </div>
+                    <div class="answer-review" id="answerReview"></div>
+                    <button class="btn-restart" onclick="restartTest()">Попробовать снова</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // БАЗА ДАННЫХ ТЕСТОВ
+        const testDatabase = {"anatomy": {"name": "Зачет по Анатомии Спланха+ЦНС", "questions": [{"question":"Нижняя стенка ротовой полости (cavitas oris) включает:","options":["подъязычно-язычную мышцу (m. hyoglossus)","подъязычную железу (glandula sublingualis)","заднее брюшко двубрюшной мышцы (venter posterior m. digastrici)","подбородочно-язычную мышцу (m. geniohyoideus)","челюстно-подъязычную мышцу (m. mylohyoideus)"],"correctAnswer":[3,4]},{"question":"К стенкам преддверия рта (vestibulum oris) относятся:","options":["небо (palatum)","зубы (dentes)","губы (labia oris)","щеки","десны (gingivae)"],"correctAnswer":[1,2,3,4]},{"question":"Твердое небо (palatum durum):","options":["является частью верхней стенки собственно полости рта","его скелет представлен небными отростками верхних челюстей","содержит апоневроз (aponeurosis palatina)","его скелет представлен телами верхних челюстей (corpus maxillae)","его скелет представлен небными костями"],"correctAnswer":[0,1,4]},{"question":"Мягкое небо (palatum molle):","options":["содержит мышцы, образованные гладкой мышечной тканью","имеет слизистую оболочку с одной стороны","имеет слизистую оболочку с обеих сторон","содержит небный апоневроз (aponeurosis palatina)","содержит мышцы, образованные поперечнополосатой мышечной тканью"],"correctAnswer":[2,3,4]},{"question":"В языке различают (lingua):","options":["тело (corpus linguae)","шейку (collum)","перешеек (isthmus)","корень (radix linguae)","верхушку (apex linguae)"],"correctAnswer":[0,3,4]},{"question":"Проток околоушной слюнной железы открывается:","options":["на подъязычном сосочке (caruncula sublingualis)","на подъязычной складке (plica sublingualis)","на слизистой преддверья рта (vestibulum oris)","на уровне 1-го верхнего премоляра","на уровне 2-го верхнего моляра"],"correctAnswer":[2,4]},{"question":"Проток поднижнечелюстной слюнной железы открывается:","options":["в преддверье рта (vestibulum oris)","в собственно полость рта (cavitas oris propria)","на подъязычной складке (plica sublingualis)","на подъязычном сосочке (caruncula sublingualis)","на слизистой щеки"],"correctAnswer":[1,3]},{"question":"Носоглотка (носовая часть глотки, pars nasalis pharyngis) имеет сообщения с:","options":["барабанной полостью (cavitas tympani)","полостью рта (cavitas oris)","пищеводом (oesophagus)","гортанью (larynx)","полостью носа (cavitas nasi)"],"correctAnswer":[0,4]},{"question":"Ротоглотка (ротовая часть глотки, pars oralis pharyngis) сообщается с:","options":["барабанной полостью (cavitas tympani)","полостью рта (cavitas oris)","пищеводом (oesophagus)","гортанью (larynx)","полостью носа (cavitas nasi)"],"correctAnswer":[1]},{"question":"Гортаноглотка (гортанная часть глотки, pars laryngea pharyngis) сообщается с:","options":["барабанной полостью (cavitas tympani)","полостью рта (cavitas oris)","пищеводом (oesophagus)","гортанью (larynx)","полостью носа (cavitas nasi)"],"correctAnswer":[2,3]},{"question":"Глоточное лимфоидное кольцо Пирогова - Вальдейера (anulus lymphoideus pharyngis) включает:","options":["глоточную миндалину (tonsilla pharyngea)","трубные миндалины (tonsilla tubaria)","небные миндалины (tonsilla palatina)","язычную миндалину (tonsilla lingualis)","глубокие шейные лимфатические узлы (nodi lymphoidei cervicales profundi)"],"correctAnswer":[0,1,2,3]},{"question":"В пищеводе различают следующие части:","options":["шейную","грудную","верхнюю","брюшную","нижнюю"],"correctAnswer":[0,1,3]},{"question":"Анатомические сужения пищевода (oesophagus):","options":["глоточно-пищеводное","аортальное","бронхиальное","диафрагмальное","кардиальное"],"correctAnswer":[0,2,3]},{"question":"Физиологические сужения пищевода (oesophagus):","options":["глоточно-пищеводное","аортальное","бронхиальное","диафрагмальное","кардиальное"],"correctAnswer":[1,4]},{"question":"Части желудка (gaster):","options":["кардиальная часть (pars cardiaca)","нисходящая часть (pars descendens)","горизонтальная часть (pars horizontalis)","пилорическая часть (pars pylorica)","тело (corpus)"],"correctAnswer":[0,3,4]},{"question":"По отношению к брюшине желудок:","options":["является мезоперитонеальным органом","является интраперитонеальным органом","является экстраперитонеальным органом","полностью лишен каких-либо контактов с брюшиной","расположен в забрюшинном пространстве"],"correctAnswer":[1]},{"question":"Привратниковая часть желудка:","options":["это входная часть желудка","является выходной частью желудка","снабжена заслонкой (valvula pylorica)","снабжена сфинктером (m. sphincter pyloricus)","снабжена многочисленными круговыми складками (plicae circulares)"],"correctAnswer":[1,2,3]},{"question":"Основными вариантами формы желудка у взрослых являются:","options":["форма крючка","форма рога","форма веретена","форма чулка","форма конуса"],"correctAnswer":[0,1,3]},{"question":"Отделы тонкой кишки (intestinum tenue):","options":["двенадцатиперстная (duodenum)","ободочная (colon)","подвздошная (ileum)","тощая (jejunum)","прямая (rectum)"],"correctAnswer":[0,2,3]},{"question":"Тощая кишка отличается от подвздошной кишки:","options":["большим диаметром","наличием кишечных ворсинок (villi intestinales)","большим количество и размером круговых складок слизистой оболочки (plicae circulares)","меньшим количество и размером круговых складок слизистой оболочки (plicae circulares)","внутрибрюшинным положением"],"correctAnswer":[0,2]},{"question":"Место перехода тонкой кишки в толстую:","options":["называется левым изгибом ободочной кишки (flexura coli sinistra)","называется  подвздошно-слепокишечным (илеоцекальным) углом (angulus ileocaecalis)","расположено в правой подвздошной ямке (fossa iliaca)","расположено в левой подвздошной ямке (fossa iliaca)","называется двенадцатиперстно-тощекишечным изгибом (flexura duodenojejunalis)"],"correctAnswer":[1,2]},{"question":"Подвздошная кишка:","options":["следует за двенадцатиперстной кишкой","следует за тощей кишкой","самая короткая часть тонкой кишки","является единственной частью кишечника, содержащей групповые лимфоидные узелки (noduli lymphoidei aggregati)","имеет брыжейку (mesenterium)"],"correctAnswer":[1,3]},{"question":"К частям толстой кишки (intestinum crassum) относят:","options":["подвздошной кишкой (ileum)","двенадцатиперстной кишкой (duodenum)","слепую кишку (caecum)","сигмовидную ободочную кишку (colon sigmoideum)","прямую кишку (rectum)"],"correctAnswer":[2,3,4]},{"question":"Толстая кишка отличается наличием:","options":["гаустр (haustra coli)","сальниковых отростков (appendices omentales = epiploicae)","лент ободочной кишки (taeniae coli)","кишечных ворсинок (villi intestinales)","групповых лимфоидных узелков (noduli lymphoidei aggregati)"],"correctAnswer":[0,1,2]},{"question":"Ленты ободочной кишки:","options":["брыжеечная (taenia mesocolica)","свободная (taenia libera)","ободочнокишечная (taenia colica)","сальниковая (taenia omentalis)","кишечная (taenia intestinalis)"],"correctAnswer":[0,1,3]},{"question":"Поперечная ободочная кишка (colon transversum) характеризуется:","options":["интраперитонеальным положением","мезоперитонеальным положением","экстраперитонеальным положением","наличием брыжейки (mesocolon)","наличием гаустр (haustra coli)"],"correctAnswer":[0,3,4]},{"question":"Восходящая ободочная кишка (colon ascendens) характеризуется:","options":["интраперитонеальным положением","мезоперитонеальным положением","экстраперитонеальным положением","наличием брыжейки (mesocolon)","наличием гаустр (haustra coli)"],"correctAnswer":[1,4]},{"question":"Слизистая заднепроходного канала (canalis analis) характеризуется наличием:","options":["кишечных ворсинок (villi intestinales)","круговых складок (plicae circulares)","групповых лимфоидныхузелков (noduli lymphoidei aggregati)","заднепроходных столбов (columnae anales)","заднепроходных заслонок (valvulae anales)"],"correctAnswer":[3,4]},{"question":"Наружный сфинктер заднего прохода (m. sphincter ani externus):","options":["состоит из гладкой мышечной ткани","состоит из поперечнополосатой мышечной ткани","расположен внутри стенки анального канала","является внешней структурой по отношению к стенке анального канала","является компонентом промежности"],"correctAnswer":[1,3,4]},{"question":"Структурно-функциональной единицей печени (hepar) принято считать:","options":["печеночный сегмент (segmentum hepatis)","клетку печени (hepatocyte)","дольку печени (lobulus hepatis)","долю печени (lobus hepatis)","печеночный сектор"],"correctAnswer":[3]},{"question":"Выделение долей, секторов и сегментов печени (структурных полимеров печени) основано на:","options":["наличии соединительнотканных перегородок между ними","анатомии притоков нижней полой вены","ветвлении воротной вены печени (v. portae hepatis)","ветвлении печеночной артерии (a. hepatica propria)","расположении ямок и борозд на поверхностях печени"],"correctAnswer":[2,3]},{"question":"Концепция «чудесной сосудистой сети» печени подразумевает:","options":["особый способ организации системы желчных протоков (ductus biliferi)","особый способ организации микрососудистого русла печени","наличие капиллярной сети между венозными сосудами","наличие капилляров, начинающихся от терминальных ветвей воротной вены печени (v. portae hepatis)","наличие капиллярной сети между артериальными сосудами"],"correctAnswer":[1,2,3]},{"question":"Общий желчный проток (ductus choledochus) образуется в результате слияния:","options":["левого печеночного протока (ductus hepaticus sinister)","общего печеночного протока (ductus hepaticus communis)","пузырного протока (ductus cysticus)","правого печеночного протока (ductus hepaticus dexter)","протока поджелудочной железы (ductus pancreaticus)"],"correctAnswer":[1,2]},{"question":"Общий печеночный проток (ductus hepaticus communis) образуется в результате слияния:","options":["пузырного протока (ductus cysticus)","правого печеночного протока (ductus hepaticus dexter)","левого печеночного протока (ductus hepaticus sinister)","общего желчного протока (ductus choledochus)","протока поджелудочной железы (ductus pancreaticus)"],"correctAnswer":[1,2]},{"question":"Проток поджелудочной железы открывается в:","options":["верхнюю часть двенадцатиперстной кишки","нисходящую часть двенадцатиперстной кишки","восходящую часть двенадцатиперстной кишки","горизонтальную часть двенадцатиперстной кишки","тощую кишку"],"correctAnswer":[1]},{"question":"Брюшинные связки печени это:","options":["серповидная связка (lig. falciforme)","венозная связка (lig. venosum)","венечная связка (lig. coronarium)","левая треугольная связка (lig. triangulare)","круглая связка печени (lig. teres hepatis)"],"correctAnswer":[0,2,3]},{"question":"Поджелудочная железа:","options":["является эндокринной железой","является экзокринной железой","является смешанной железой по своей природе","полностью покрыта брюшиной","расположена экстраперитонеально"],"correctAnswer":[2,4]},{"question":"Основными частями поджелудочной железы являются:","options":["тело (corpus pancreatis)","свод (fornix)","головка (caput pancreatis)","хвост (cauda pancreatis)","квадратная доля (lobus qaudratus)"],"correctAnswer":[0,2,3]},{"question":"Положение поджелудочной железы относительно брюшины:","options":["интраперитонеальное","мезоперитонеальное","инфраперитонеальное","супраперитонеальное","экстраперитонеальное"],"correctAnswer":[4]},{"question":"Основной (Вирсунгов) проток поджелудочной железы (ductus pancreaticus) открывается:","options":["на большом сосочке двенадцатиперстной кишки (papilla duodeni major)","на малом сосочке двенадцатиперстной кишки (papilla duodeni minor)","в печеночно-поджелудочную ампулу (ampulla hepatopancreatica)","в восходящую часть двенадцатиперстной кишки (pars ascendens duodeni)","в верхнюю часть двенадцатиперстной кишки (pars superior duodeni)"],"correctAnswer":[0,2]},{"question":"Части желчного пузыря (vesica fellea):","options":["дно (fundus vesicae felleae)","шейка (collum vesicae felleae)","перешеек (isthmus vesicae felleae)","тело (corpus vesicae felleae)","хвост (cauda vesicae felleae)"],"correctAnswer":[0,1,3]},{"question":"В печеночно-поджелудочную ампулу (ampulla hepatopancreatica) открываются:","options":["пузырный проток (ductus cysticus)","общий желчный проток (ductus choledochus)","проток поджелудочной железы (ductus pancreaticus)","общий печеночный проток (ductus hepaticus communis)","добавочный проток поджелудочной железы (ductus pancreaticus accessorius)"],"correctAnswer":[1,2]},{"question":"Положение желчного пузыря относительно брюшины в основном:","options":["интраперитонеальное","мезоперитонеальное","ретроперитонеальное","супраперитонеальное","экстраперитонеальное"],"correctAnswer":[1]},{"question":"Проекция дна желчного пузыря соответствует:","options":["месту пересечения реберной дуги и средней подмышечной линии","месту пересечения реберной дуги и передней срединной линии","месту пересечения реберной дуги и латерального края правой прямой мышцы живота","месту пересечения реберной дуги и медиального края левой прямой мышцы живота","месту пересечения 6-го ребра и среднеключичной линии"],"correctAnswer":[2]},{"question":"Отделами верхнего этажа брюшинной полости (cavitas peritonealis) являются:","options":["правый брыжеечный синус (sinus mesentericus dexter)","левый брыжеечный синус (sinus mesentericus sinister)","сальниковая сумка (bursa omentalis)","преджелудочная сумка (bursa pregastrica)","печеночная сумка (bursa hepatica)"],"correctAnswer":[2,3,4]},{"question":"Мезоперитонеально расположены:","options":["желудок (gaster)","двенадцатиперстная кишка (duodenum)","подвздошная кишка (ileum)","восходящая ободочная кишка (colon ascendens)","нисходящая ободочная кишка (colon descendens)"],"correctAnswer":[3,4]},{"question":"Интраперитонеально расположены:","options":["желудок (gaster)","двенадцатиперстная кишка (duodenum)","поперечная ободочная кишка (colon transversum)","восходящая ободочная кишка (colon ascendens)","подвздошная кишка (ileum)"],"correctAnswer":[0,2,4]},{"question":"Органы, расположенные забрюшинно:","options":["желудок (gaster)","двенадцатиперстная кишка (duodenum)","поперечная ободочная кишка (colon transversum)","восходящая ободочная кишка (colon ascendens)","поджелудочная железа (pancreas)"],"correctAnswer":[1,4]},{"question":"Правый брыжеечный синус (sinus mesentericus dexter) ограничен:","options":["желудком (gaster)","брыжейкой поперечной ободочной кишки (mesocolon)","восходящей ободочной кишкой (colon ascendens)","нисходящей ободочной кишкой (colon descendens)","корнем брыжейки тонкой кишки (radix mesenterii)"],"correctAnswer":[1,2,4]},{"question":"Отделами среднего этажа брюшинной полости являются:","options":["правая околоободочная борозда ( sulcus paracolicus dexter)","сальниковая сумка (bursa omentalis)","левая околоободочная борозда (sulcus paracolicus sinister)","левый брыжеечный синус (sinus mesentericus sinister)","правый брыжеечный синус (sinus mesentericus dexter)"],"correctAnswer":[0,2,3,4]},{"question":"Верхние дыхательные пути включают:","options":["гортань (larynx)","трахею (trachea)","носовую часть глотки (pars nasalis pharyngis)","ротовую часть глотки (pars oralis pharyngis)","носовую полость (cavitas nasi)"],"correctAnswer":[2,3,4]},{"question":"Носовые ходы (meatus nasi):","options":["общий (communis)","средний (medius)","верхний (superior)","нижний (inferior)","задний (posterior)"],"correctAnswer":[0,1,2,3]},{"question":"Околоносовые пазухи, сообщающиеся с верхним носовым ходом (meatus nasi superior):","options":["лобная пазуха (sinus frontalis)","клиновидная пазуха (sinus sphenoidalis)","поперечный синус (sinus transversus)","задние ячейки решетчатой кости (cellulae ethmoidales posteriores)","передние ячейки решетчатой кости (cellulae ethmoidales anteriores)"],"correctAnswer":[1,3]},{"question":"Воспалительный процесс может распространятся от носоглотки к среднему уху через:","options":["хоаны (choanae)","сосцевидную пещеру (antrum mastoideum)","слуховую трубу (tuba auditivae)","внутренний слуховой проход (porus acusticus internus)","клиновидную пазуху (sinus sphenoidalis)"],"correctAnswer":[2]},{"question":"Средний носовой ход сообщается с:","options":["лобной пазухой (sinus frontalis)","верхнечелюстной пазухой (sinus maxillaris)","клиновидной пазухой (sinus sphenoidalis)","средними ячейками решетчатой кости (cellulae etmoidales medii)","задними ячейками решетчатой кости (cellulae etmoidales posteriores)"],"correctAnswer":[0,1,3]},{"question":"Вход в гортань (aditus laryngis) ограничен:","options":["щитовидным хрящом (cartilago thyroidea)","надгортанником (epiglottis)","черпаловидными хрящами (cartilagines arytenoideae)","складками преддверия (plicae vestibulares)","черпалонадгортанными складками (plicae aryepiglotticae)"],"correctAnswer":[1,2,4]},{"question":"Границы подголосовой полости (cavitas infraglottica) это:","options":["складки преддверия (plicae vestibulares)","голосовые складки (plicae vocales)","надгортанник (epiglottis)","первый хрящ трахеи (сartilago trachealis)","желудочки гортани (ventriculus laryngis)"],"correctAnswer":[1,3]},{"question":"Голосовые связки (lig. vocale):","options":["натянуты между щитовидным хрящом (cartilago thyroidea) и перстневидным хрящом (cartilago cricoidea)","натянуты между перстневидным хрящом (cartilago cricoidea) и черпаловидными хрящами (cartilago arytenoidea)","натянуты между щитовидным хрящом (cartilago thyroidea) и черпаловидными хрящами (cartilago arytenoidea)","являются частью связки преддверья (lig. vestibulare)","образуют верхний край эластического конуса (conus elasticus)"],"correctAnswer":[2,4]},{"question":"Голосовая щель (rima vocalis) ограничена:","options":["складками преддверия (plicae vestibulares)","голосовыми складками (plicae vocales)","щитовидным хрящом (cartilago thyroidea)","клиновидными хрящами (cartilago cuneiformis)","черпаловидными хрящами (cartilago arytenoidea)"],"correctAnswer":[1,4]},{"question":"Границы преддверия гортани (vestibulum laryngis):","options":["голосовая щель (rima vocalis)","желудочки гортани (vetnriculi laryngis)","вход в гортань (aditus laryngis)","перстневидный хрящ (cartilago cricoidea)","складки преддверия (plicaе vestibularеs)"],"correctAnswer":[2,4]},{"question":"Мышца, расширяющая голосовую щель (rima glottidis,vocalis), это:","options":["поперечная черпаловидная мышца (m. arytenoideus transversus)","косая черпаловидная мышца (m. arytenoideus obliquus)","латеральная перстнечерпаловидная мышца (m. cricoarytenoideus lateralis)","задняя перстнечерпаловидная мышца (m. cricoarytenoideus posterior)","голосовая мышца (m. vocalis)"],"correctAnswer":[3]},{"question":"Мышцы, сужающие голосовую щель (rima glottidis vocalis), это:","options":["поперечная черпаловидная мышца (m. arytenoideus transversus)","косая черпаловидная мышца (m. arytenoideus obliquus)","голосовая мышца (m. vocalis)","задняя перстнечерпаловидная мышца (m. cricoarytenoideus posteroir)","латеральная перстнечерпаловидная мышца (m. cricoarytenoideus lateralis)"],"correctAnswer":[0,1,4]},{"question":"Мышцы, которые регулируют натяжение голосовых связок (lig. vocale):","options":["латеральная перстнечерпаловидная мышца (m. cricoarytenoideus lateralis)","голосовая мышца (m. vocalis)","перстнещитовидная мышца (m. cricothyroideus)","щиточерпаловидная мышца (m. thyroarytenoideus)","задняя перстнечерпаловидная мышца (m. cricoarytenoideus posterior)"],"correctAnswer":[1,2]},{"question":"Спереди шейной части трахеи (trachea) лежат:","options":["надподъязычные мышцы","перешеек щитовидной железы (isthmus glandulae thyroideae)","грудино-ключично-сосцевидные мышцы (m. sternocleidomastoideus)","грудино-щитовидные мышцы (m. sternothyroideus)","тимус (thymus)"],"correctAnswer":[1,3]},{"question":"Позади трахеи (trachea) непосредственно располагается:","options":["пищевод (oesophagus)","дуга аорты (arcus aortae)","тимус (thymus)","глотка (pharynx)","позвоночный столб (columna vertebralis)"],"correctAnswer":[0]},{"question":"Правый главный бронх (bronchus principalis dexter):","options":["имеет более вертикальное направление, чем левый главный бронх (bronchus principalis sinister)","длиннее, чем левый главный бронх","шире, чем левый главный бронх","содержит 9-12 хрящевых полуколец","в корне правого легкого расположен вверху"],"correctAnswer":[0,2,4]},{"question":"Левый главный бронх (bronchus principalis sinister):","options":["имеет более вертикальное направление, чем правый главный бронх (bronchus principalis dexster)","длиннее, чем правый главный бронх","шире, чем правый главный бронх","содержит 6-8 хрящевых полуколец","лежит под дугой аорты (arcus aortae)"],"correctAnswer":[1,4]},{"question":"Для строения стенки трахеи характерно:","options":["наличие хрящевых полуколец","отсутствие подслизистой основы","наличие продольного и циркулярного мышечных слоев (tunica muscularis)","наличие перепончатой стенки (paries membranacea)","наличие кольцевых связок (ligg. anularia)"],"correctAnswer":[0,3,4]},{"question":"Части щитовидной железы (glandula thyroidea):","options":["перешеек","головка","правая доля","пирамидальная доля","левая доля"],"correctAnswer":[0,2,3,4]},{"question":"Паращитовидные железы (glandulae parathyroideae) расположены:","options":["на задней поверхности долей щитовидной железы","на передней поверхности боковых долей щитовидной железы","вокруг щитовидной железы, образуя полукольцо","под перешейком щитовидной железы","на верхних полюсах долей щитовидной железы"],"correctAnswer":[0]},{"question":"Косая щель правого легкого (fissura obliqua) разделяет:","options":["реберную и медиастинальную поверхности","верхнюю и нижнюю доли","реберную и диафрагмальную поверхности","верхнюю и среднюю доли","среднюю и нижнюю доли"],"correctAnswer":[1,4]},{"question":"Горизонтальная щель правого легкого (fissura horizontalis pulmonis dextri) разделяет:","options":["левую и правую доли","верхнюю и нижнюю доли","верхушку и основание","диафрагмальную и медиастинальную поверхности","верхнюю и среднюю доли"],"correctAnswer":[4]},{"question":"Структурными единицами (полимерами) легкого являются:","options":["ацинусы","дольки","доли","бронхолегочные сегменты","сектора"],"correctAnswer":[1,2,3]},{"question":"Структурно-функциональной единицей альвеолярного дерева легкого является:","options":["ацинус","долька","доля","бронхолегочный сегмент","сектор"],"correctAnswer":[0]},{"question":"Компонентами бронхиального дерева (arbor bronchialis) являются:","options":["главный бронх (bronchus principalis)","сегментарные бронхи (bronchi segmentales)","дыхательные бронхиолы (bronchioli respiratorii)","долевые бронхи (bronchi lobares)","дольковые бронхи (bronchi lobulares)"],"correctAnswer":[0,1,3,4]},{"question":"Плевральные синусы (recessus pleurales):","options":["косой синус (recessus obliquus)","реберно-диафрагмальный синус (recessus costodiaphragmaticus)","диафрагмально-медиастинальный синус (recessus phrenicomediastinalis)","поперечный синус (recessus transversus)","реберно-медиастинальный синус (recessus costomediastinalis)"],"correctAnswer":[1,2,4]},{"question":"Верхушка легкого (apex pulmonis) определяется:","options":["на 2 см выше ключицы","в пятом межреберье","на уровне ключицы","на 3-4 см выше первого ребра","на уровне первого ребра"],"correctAnswer":[0,3]},{"question":"Средостение (mediastinum):","options":["часть грудной полости, расположенная между двумя плевральными полостями","ограничено латерально правыми и левыми средостенными плеврами","содержит органы, сосуды и нервы","подразделяется на правое и левое средостение","подразделяется на верхнее и нижнее средостение"],"correctAnswer":[0,1,2,4]},{"question":"Главными структурами, содержащимися в заднем средостении (mediastinum posterius), являются:","options":["пищевод (oesophagus)","трахея (trachea)","грудная часть аорты (pars thoracica aortae)","тимус (thymus)","легкое (pulmo)"],"correctAnswer":[0,2]},{"question":"Основным органом, расположенным в среднем средостении (mediastinum medium), является:","options":["сердце (cor)","трахея (trachea)","пищевод (oesophagus)","тимус (thymus)","легкое (pulmo)"],"correctAnswer":[0]},{"question":"В верхнем средостении (medistinum superius) расположены следующие органы:","options":["трахея (trachea)","тимус (thymus)","щитовидная железа (glandula thyroidea)","пищевод (oesophagus)","сердце (cor)"],"correctAnswer":[0,1,3]},{"question":"Органы, прилегающие к передней поверхности левой почки (ren sinister):","options":["сигмовидная ободочная кишка (colon sigmoideum)","желудок (gaster)","поджелудочная железа (pancreas)","двенадцатиперстная кишка (duodenum)","тощая кишка (jejunum)"],"correctAnswer":[1,2,4]},{"question":"Органы, прилегающие к передней поверхности правой почки (ren dexter):","options":["желудок (gaster)","поджелудочная железа (pancreas)","печень (hepar)","правый изгиб ободочной кишки (flexura coli dextra)","тощая кишка (jejunum)"],"correctAnswer":[2,3]},{"question":"К фиксирующему аппарату почек относится:","options":["почечная фасция (fascia renalis)","почечная ножка (pedunculus renis)","малый сальник (omentum minus)","почечное ложе","внутрибрюшное давление"],"correctAnswer":[0,1,3,4]},{"question":"К оболочкам почки относят:","options":["фиброзную капсулу (capsula fibrosa)","жировую капсулу (capsula adiposa)","белочную оболочку (tunica albuginea)","почечную фасцию (fascia renalis)","серозную оболочку (tunica serosa)"],"correctAnswer":[0,1,3]},{"question":"Почки (ren) расположены по отношению к брюшине (peritoneum):","options":["интраперитонеально","мезоперитонеально","инфраперитонеально","ретроперитонеально","супраперитонеально"],"correctAnswer":[3]},{"question":"В состав нефрона (nephron) входят:","options":["дистальный извитой каналец (tubulus contortus distalis)","почечное тельце (corpusculum renale)","петля нефрона (ansa nephroni) (петля Генле)","сосочковый проток (ductus papilaris)","проксимальный извитой каналец (tubulus contortus proximalis)"],"correctAnswer":[0,1,2,4]},{"question":"Почечная пазуха (sinus renalis) содержит:","options":["почечную лоханку (pelvis renalis)","кровеносные и лимфатические сосуды","мочеточник","малые почечные чашки (calyx renalis minor)","большие почечные чашки (calyx renalis major)"],"correctAnswer":[0,3,4]},{"question":"Части мочеточника (ureter):","options":["верхняя часть (pars superior)","брюшная часть (pars abdominalis)","нисходящая часть (pars descendens)","тазовая часть (pars pelvica)","внутристеночная часть (pars intramuralis)"],"correctAnswer":[1,3,4]},{"question":"Мочеточники расположены:","options":["интраперитонеально","мезоперитонеально","инфраперитонеально","ретроперитонеально","супраперитонеально"],"correctAnswer":[3]},{"question":"Просвет мочеточника (ureter) сужен:","options":["в месте его начала","в средней части","в месте пересечения пограничной линии","в верхней трети","во внутристеночной части"],"correctAnswer":[0,2,4]},{"question":"К задней поверхности пустого мочевого пузыря (vesica urinaria) у женщин прилежат:","options":["яичники (ovarium)","прямая кишка (rectum)","шейка матки (cervix uteri)","влагалище (vagina)","простата (prostata)"],"correctAnswer":[2,3]},{"question":"К задней поверхности мочевого пузыря (vesica urinaria) у мужчин прилежат:","options":["прямая кишка (rectum)","простата (prostata)","семенные пузырьки (железы) (glandula, vesicula seminalis)","ампула семявыносящего протока (ampulla ductis deferentis)","сигмовидная ободочная кишка (colon sigmoideum)"],"correctAnswer":[0,2,3]},{"question":"В наполненном состоянии мочевой пузырь (vesica urinaria) покрыт брюшиной:","options":["мезоперитонеально","интраперитонеально","экстраперитонеально","ретроперитонеально","сверху, по бокам и сзади"],"correctAnswer":[0,4]},{"question":"Пустой мочевой пузырь (vesica urinaria) покрыт брюшиной:","options":["мезоперитонеально","экстраперитонеально","интраперитонеально","сверху и сбоков","только сверху"],"correctAnswer":[1,4]},{"question":"В мочевом пузыре (vesica urinaria) выделяют следующие части:","options":["дно (fundus)","верхушку (apex)","головку (caput)","тело (corpus)","шейку (cervix)"],"correctAnswer":[0,1,3,4]},{"question":"Наружное отверстие женского мочеиспускательного канала (ostium urethrae externum) открывается:","options":["впереди клитора (clitoris)","позади клитора (clitoris)","впереди отверстия влагалища (vagina)","позади отверстием влагалища (vagina)","сзади от заднего прохода (anus)"],"correctAnswer":[1,2]},{"question":"Наружный сфинктер мочеиспускательного канала (m. sphincter urethrae externus):","options":["находится в стенке внутреннего отверстия мочеиспускательного канала (ostium urethrae internus)","является структурой промежности (perineum)","образован гладкой мышечной тканью","образован поперечнополосатой мышечной тканью","непроизвольный по функции"],"correctAnswer":[1,3]},{"question":"Внутренний сфинктер мочеиспускательного канала (sphincter urethrae internus):","options":["находится в стенке внутреннего отверстия мочеиспускательного канала (ostium urethrae internus)","служит также сфинктером мочевого пузыря (sphincter vesicae)","произвольный по функции","относится к промежности (perineum)","образован гладкой мышечной тканью"],"correctAnswer":[0,1,4]},{"question":"Корковое вещества (cortex) надпочечника относится к железам:","options":["бранхиогенным","эктодермального происхождения","мезодермального происхождения","нейроэктодермального происхождения","энтодермального происхождения"],"correctAnswer":[2]},{"question":"Надпочечники (glandula suprarenalis) расположены:","options":["интраперитонеально","мезоперитонеально","инфраперитонеально","ретроперитонеально","супраперитонеально"],"correctAnswer":[3]},{"question":"Правый надпочечник (glandula suprarenalis) прилежит к:","options":["почке (ren)","печени (hepar)","правому изгибу ободочной кишки (flexura coli dextra)","нижней полой вене (vena cava inferior)","аорте (aorta)"],"correctAnswer":[0,1,3]},{"question":"Яичко (testis):","options":["покрыто белочной оболочкой (tunica albuginea)","состоит из паренхимы, разделенной на дольки (lobuli testis)","относится к наружным половым органам","содержит извитые семенные канальцы (tubuli seminiferi contorti)","содержит прямые семенные канальцы (tubuli seminiferi recti)"],"correctAnswer":[0]},{"question":"Придаток яичка (epididymis):","options":["является частью семенного канатика (funiculus spermaticus)","имеет головку (caput epididymidis)","содержит извитые семенные канальцы (tubuli seminiferi contorti)","содержит проток (ductus epididymidis)","имеет тело (corpus epididymidis)"],"correctAnswer":[1,3,4]},{"question":"В строении яичка (testis) выделяют:","options":["извитые семенные канальцы (tubuli seminiferi contorti)","средостение (mediastinum testis)","семявыносящий проток (ductus deferens)","прямые семенные канальцы (tubuli seminiferi recti)","сеть яичка (rete testis)"],"correctAnswer":[0,1,3,4]},{"question":"Основные составляющие придатка яичка (epididymis):","options":["головка (caput epididymidis)","извитые семенные канальцы (tubuli seminiferi contorti)","хвост (cauda epididymidis)","тело (corpus epididymidis)","прямые семенные канальцы (tubuli seminiferi recti)"],"correctAnswer":[0,2,3]},{"question":"Простата (prostata) прилежит к мочевому пузырю:","options":["верхушкой (apex prostatae)","основанием (basis prostatae)","передней поверхностью (facies anterior)","перешейком (isthmus prostatae)","задней поверхностью (facies posterior)"],"correctAnswer":[1]},{"question":"Простата (prostata) прилежит к мочеполовой диафрагме:","options":["передней поверхностью (facies anterior)","основанием (basis prostatae)","верхушкой (apex prostatae)","перешейком (isthmus prostatae)","задней поверхностью (facies posterior)"],"correctAnswer":[2]},{"question":"В простате (prostata) выделяют следующие доли:","options":["переднюю (lobus anterior)","правую (lobus dexter)","заднюю (lobus posterior)","левую (lobus sinister)","среднюю (lobus medius)"],"correctAnswer":[1,3,4]},{"question":"Задняя поверхность простаты (prostata) обращена к:","options":["мочевому пузырю (vesica urinaria)","семенным пузырькам (vesicula seminalis)","прямой кишке","лобковому симфизу (symphisis pubica)","мошонке (scrotum)"],"correctAnswer":[2]},{"question":"Семявыносящий проток (ductus deferens) имеет следующие части:","options":["тазовую (pars pelvica)","мошоночную (яичковую) (pars scrotalis)","пузырную (pars vesicalis)","канатиковую (pars funicularis)","паховую (pars inguinalis)"],"correctAnswer":[0,1,3,4]},{"question":"К оболочкам мошонки (scrotum) относят:","options":["кожу (cutis)","адвентицию (tunica adventitia)","мясистую оболочку (tunica dartos)","слизистую оболочку (tunica mucosa)","фасцию мышцы, поднимающей яичко (fascia cremasterica)"],"correctAnswer":[0,2,4]},{"question":"Внутренняя семенная фасция (fascia spermatica interna) является производной:","options":["поверхностной фасции живота (fascia superficialis abdominis)","брюшины (peritoneum)","фасции внутренней косой мышцы (m. obliqus internus abdominis)","поперечной фасции (fascia transversalis)","апоневроза наружной косой мышцы живота (m. obliqus externus abdominis)"],"correctAnswer":[3]},{"question":"Компонентами семенного канатика (funiculus spermaticus) являются:","options":["проток придатка (ductus epididymidis)","мочеточник (ureter)","семявыносящий проток (ductus deferens)","сосуды и нервы семявыносящего протока и яичка","семявыбрасывающий проток (ductus ejaculatorius)"],"correctAnswer":[3,4]},{"question":"Части полового члена (penis):","options":["тело (corpus penis)","мошонка (scrotum)","корень (radix penis)","головка (glans penis)","шейка (collum)"],"correctAnswer":[0,2,3]},{"question":"В строении полового члена (penis) выделяют:","options":["семявыносящий проток (ductus deferens)","пещеристые тела (corpora cavernosa penis)","губчатое тело (corpus spongiosum penis)","мочеиспускательный канал (urethra)","бульбоуретральные железы (glandulae bulbourethrales)"],"correctAnswer":[1,2,3]},{"question":"В мужском мочеиспускательном канале (urethra masculina) выделяют следующие части:","options":["тазовую (pars pelvca)","простатическую (pars prostatica)","пузырную (pars vesicalis)","перепончатую (pars membranacea)","губчатую (pars spongiosa)"],"correctAnswer":[1,3,4]},{"question":"Произвольный сфинктер мужского мочеиспускательного канала (m. sphincter urethrae) расположен:","options":["вокруг тазовой части (pars pelvis) мочеиспускательного канала","вокруг простатической части (pars prostatica) мочеиспускательного канала","вокруг перепончатой части (pars membranacea) мочеиспускательного канала","вокруг губчатой части (pars spongiosa) мочеиспускательного канала","в головке полового члена (glans penis)"],"correctAnswer":[2]},{"question":"Семенной холмик (colliculus seminalis):","options":["находится в простатической части мочеиспускательного канала (pars prostatica urerthrae)","находится в губчатой части мочеиспускательного канала (pars spongiosa urerthrae)","находится в семенной железе (glandula, vesicula seminalis)","является местом, где открываются протоки половых желез","является местом локализации внутреннего сфинктера"],"correctAnswer":[0,3]},{"question":"К внутренним женским половым органам относятся:","options":["яичники (ovaria)","маточные трубы (tubae uterinae)","клитор (clitoris)","преддверие влагалища (vistibulum vaginae)","влагалище"],"correctAnswer":[0,1,4]},{"question":"Матка (uterus) расположена:","options":["в полости малого таза","перед мочевым пузырем","сверху и позади мочевого пузыря","перед прямой кишкой","снизу и позади мочевого пузыря"],"correctAnswer":[0,2,3]},{"question":"Передняя поверхность матки (uterus) обращена к:","options":["лобковому симфизу","передней стенке таза","мочевому пузырю (vesica urinaria)","прямой кишке (rectum)","простате (prostatа)"],"correctAnswer":[2]},{"question":"Прямокишечно-маточное углубление (excavatio rectouterina):","options":["выстлано брюшиной","называется клиницистами «дугласов карман»","называется клиницистами «винслов карман»","опускается до промежности","доходит до верхней части задней стенки влагалища"],"correctAnswer":[0,1,4]},{"question":"Выделяют следующие части матки (uterus):","options":["дно (fundus uteri)","тело (corpus uteri)","шейку (cervix uteri)","рог матки (cornu uteri)","маточные трубы (tubae uterinae)"],"correctAnswer":[0,1,2,3]},{"question":"Шейка матки (cervix uteri) имеет:","options":["надвлагалищную часть (portio supravaginalis cervicis)","внутреннюю часть (portio interna)","влагалищную часть (portio vaginalis)","околовлагалищную часть (portio paravaginalis)","отверстие матки (ostium uteri)"],"correctAnswer":[0,2,4]},{"question":"К связкам матки (uterus) относятся:","options":["круглая связка матки (lig. teres uteri)","кардинальная связка (lig. cardinale)","связка, подвешивающая яичник (lig. suspensorium ovarii)","широкая связка матки (lig. latum uteri)","лобково-шеечная связка (lig. pubocervicalis)"],"correctAnswer":[0,1,3,4]},{"question":"Широкая связка матки (lig. latum uteri):","options":["является складкой брюшины, содержащей ряд важных структур","представляет собой соединительнотканный тяж, идущий от матки к стенке таза","является рудиментом связки зародыша, участвующей в процессе опускания яичника","представляет собой соединительнотканный тяж, идущий к паховому каналу и проходящий через него","представляет собой сосудисто-нервный пучок"],"correctAnswer":[0]},{"question":"У яичника (ovarium) выделяют поверхности:","options":["переднюю (anterior)","заднюю (posterior)","нижнюю (inferior)","латеральную (lateral)","медиальную (medial)"],"correctAnswer":[3,4]},{"question":"К структурам, фиксирующим яичник (ovarium),отнсятся:","options":["брыжейка яичника (mesovarium)","собственная связка яичника (lig. ovarii proprium)","кардинальная связка (lig. cardinale)","подвешивающая связка яичника (lig. suspensorium ovarii)","мышца, поднимающая яичко (m. cremaster)"],"correctAnswer":[0,1,3]},{"question":"В маточной трубе (tuba uterina, salpinx) выделяют части:","options":["воронка (infundibulum)","шейка (cervix)","перешеек (isthmus)","ампула (ampulla)","маточная часть (pars uterina)"],"correctAnswer":[0,2,3,4]},{"question":"Ампула маточной трубы (ampulla tubae uterinae) следует за:","options":["маточной частью (pars uterina) маточной трубы","брюшным отверстием маточной трубы (ostium abdominale tubae uterinae)","бахромками маточной трубы (fimbriae tubae uterinae)","маточным отверстием маточной трубы (ostium tubae uterinae)","перешейком маточной трубы (istmus tubae uterinae)"],"correctAnswer":[4]},{"question":"Отверстие влагалища (ostium vaginae) открывается в:","options":["полость матки (cavitas uteri)","пузырно-маточное углубление (excavatio vesicouterina)","прямокишечно-маточное углубление (exavatio rectouterina)","полость таза","преддверие влагалища (vestibulum vaginae)"],"correctAnswer":[4]},{"question":"К передней стенке влагалища (vagina) прилегают:","options":["дно мочевого пузыря","передняя брюшная стенка","мочеиспускательный канал","прямая кишка","дно матки"],"correctAnswer":[0,2]},{"question":"В преддверие влагалища (vestibulum vaginae) открываются:","options":["внутреннее отверстие мочеиспускательного канала (ostium urethrae internum)","наружное отверстие мочеиспускательного канала (ostium urethrae externum)","влагалище (vagina)","канал шейки матки (canalis cervicis uteri)","большие железы преддверия (glandulae vestibulares majores)"],"correctAnswer":[1,2,4]},{"question":"Части промежности (perineum):","options":["мочеполовая диафрагма (diaphragma urogenitalis)","диафрагма таза (diaphragma pelvis)","половая диафрагма (diaphragma genitalis)","мочевая диафрагма (diaphragma urinaria)","заднепроходная диафрагма (diaphragma anale)"],"correctAnswer":[0,1]},{"question":"К глубоким мышцам мочеполовой диафрагмы относят:","options":["глубокую поперечную мышцу промежности (m.transversus perinei profundus)","луковично-губчатую мышцу (m. bulbospongiosus)","седалищно-пещеристую мышцу (m. ichiocavernosus)","копчиковую мышцу (m. coccygeus)","наружный сфинктер мочеиспускательного канала (m. sphincter urethrae externus)"],"correctAnswer":[0,4]},{"question":"К поверхностным мышцам мочеполовой диафрагмы относят:","options":["поверхностную поперечную мышцу промежности (m. transversus perinei superficialis)","луковично-губчатую мышцу (m. bulbospongiosus)","седалищно-пещеристую мышцу (m.ichiocavernosus)","копчиковую мышцу (m. coccygeus)","наружный сфинктер мочеиспускательного канала (m. sphincter urethrae externus)"],"correctAnswer":[0,1,2]},{"question":"К глубоким мышцам диафрагмы таза относят:","options":["глубокую поперечную мышцу промежности (m. transversus perinei profundus)","луковично-губчатую мышцу (m. bulbospongiosus)","седалищно-пещеристую мышцу (m. ichiocavernosus)","копчиковую мышцу (m. coccygeus)","мышцу, поднимающую задний проход (m. levator ani)"],"correctAnswer":[3,4]},{"question":"К поверхностным мышцам диафрагмы таза относят:","options":["глубокую поперечную мышцу промежности (m. transversus perinei profundus)","наружный сфинктер заднего прохода (m. sphincter ani externus)","седалищно-пещеристую мышцу (m. ichiocavernosus)","копчиковую мышцу (m. coccygeus)","мышцу, поднимающую задний проход (m. levator ani)"],"correctAnswer":[1]},{"question":"Верхняя граница спинного мозга (medulla spinalis) соответствует уровню:","options":["большого отверстия (foramen magnum)","передней дуги атланта CI","выхода первой пары спинномозговых корешков (radix spinalis)","межпозвоночному диску CI-CII","межпозвоночному диску CII-CIII"],"correctAnswer":[0,2]},{"question":"Нижняя граница спинного мозга (medulla spinalis) проходит на уровне:","options":["межпозвоночного диска LI-LII","мыса (promontorium)","крестцового позвонка I (SI)","крестцового позвонка (SIV)","крестцовой щели (hiatus sacralis)"],"correctAnswer":[0]},{"question":"Терминальная нить (filum terminale):","options":["является атрофированной частью спинного мозга","является производным оболочек спинного мозга","сопровождается спинномозговыми корешками","начинается на уровне межпозвоночного диска LI-LII","является жизненно важной структурой"],"correctAnswer":[1,2,3]},{"question":"На поверхности спинного мозга (medulla spinalis) имеются:","options":["задняя срединная борозда (sulcus medianus posterior)","передняя срединная щель (fissura mediana anterior)","передняя латеральная борозда (sulcus anterolateralis)","задняя латеральная борозда (sulcus posterolateralis)","пограничная борозда (sulcus terminalis)"],"correctAnswer":[0,1,2,3]},{"question":"Спинной мозг (medulla spinalis) заканчивается:","options":["мозговым конусом (conus medullaris)","на уровне тела 12-го грудного позвонка","на уровне тела 1-го крестцового позвонка","на уровне межпозвоночного диска L1-L2","на уровне межпозвоночного диска S1-S2"],"correctAnswer":[0,3]},{"question":"Передние корешки (radix anterior) спинного мозга (medulla spinalis) выходят из:","options":["задней срединной борозды (sulcus medianus posterior)","передней срединной щели (fissura mediana anterior)","передней латеральной борозды (sulcus anterolateralis)","задней латеральной борозды (sulcus posterolateralis)","пограничной борозды (sulcus terminalis)"],"correctAnswer":[2]},{"question":"Передний канатик (funiculus anterior) спинного мозга (medulla spinalis):","options":["ограничен передней срединной щелью (fissura mediana anterior)","ограничен передней латеральной бороздой (sulcus anterolateralis)","состоит из серого вещества","состоит из белого вещества","место начала спинномозговых нервов (nervi spinales)"],"correctAnswer":[0,1,3]},{"question":"Задние корешки (radix posterior) спинного мозга входят в области:","options":["задней срединной борозды (sulcus medianus posterior)","передней срединной щели (fissura mediana anterior)","передней латеральной борозды (sulcus anterolateralis)","задней латеральной борозды (sulcus posterolateralis)","пограничной борозды (sulcus terminalis)"],"correctAnswer":[3]},{"question":"Число сегментов спинного мозга (medulla spinalis) соответствует:","options":["числу пар спинномозговых нервов","числу позвонков","окончательному количеству сомитов эмбриона","числу ребер","количеству корешков спинномозговых нервов"],"correctAnswer":[0,2]},{"question":"Нейроны заднего рога (cornu posterius) спинного мозга образуют:","options":["студенистое вещество (substantia gelatinosa)","собственное ядро (nucleus рroprius)","дорсальное ядро (nucleus dorsalis)","промежуточно-латеральное ядро (nucleus intermediolateralis)","промежуточно-медиальное ядро (nucleus intermediomedialis)"],"correctAnswer":[0,1]},{"question":"Ядра переднего рога (cornu anterius) спинного мозга состоят из тел нейронов, которые являются:","options":["соматическими двигательными","мультиполярными","ассоциативными","чувствительными","биполярными"],"correctAnswer":[0,1]},{"question":"Белое вещество спинного мозга представлено:","options":["задними канатиками (funiculus posterior)","боковыми канатиками (funiculus lateralis)","передними канатиками (funiculus anterior)","передними столбами (columna anterior)","задними столбами (columna posterior)"],"correctAnswer":[0,1,2]},{"question":"Задний канатик (funiculus posterior) спинного мозга в верхних отделах состоит из:","options":["тонкого пучка (fasciculus gracilis)","клиновидного пучка (fasciculus cuneatus)","заднего рога (cornu posterius)","заднего корешка (radix posterior)","заднего столба (columna posterior)"],"correctAnswer":[0,1]},{"question":"Тонкий и клиновидный пучки (fasciculus gracilis et fasciculus cuneatus) связаны с:","options":["путями проприоцептивной чувствительности","пирамидной системой","экстрапирамидной системой","путями болевой и температурной чувствительности","путями интероцептивной чувствительности"],"correctAnswer":[0]},{"question":"Боковой канатик (funiculus lateralis) спинного мозга содержит:","options":["латеральный спинноталамический путь (tractus spinothalamicus lateralis)","красноядерно-спинномозговой путь (tractus rubrospinalis)","латеральный корково-спинномозговой путь (tractus corticospinalis lateralis)","крыше-спинномозговой путь (tractus tectospinalis)","задний спинномозжечковый путь (tractus spinocerebellaris posterior)"],"correctAnswer":[0,1,2,4]},{"question":"Белое вещество (substantia alba) спинного мозга:","options":["располагается кнаружи от серого вещества спинного мозга","образовано отростками нейронов","представлено передними, задними и боковыми канатиками (funiculus anterior, posterior, lateralis)","образовано телами нейронов","представлено передними, задними и боковыми столбами (columna anterior, posterior, lateralis)"],"correctAnswer":[0,1,2]},{"question":"Тело вставочного нейрона простой рефлекторной дуги располагается:","options":["в задних рогах (cornu posterius)","в передних рогах (cornu anterius)","в боковых рогах (cornu laterale)","в задних канатиках (funiculus posterior)","в чувствительном узле спинномозгового нерва (ganglion sensorium nervi spinalis)"],"correctAnswer":[0]},{"question":"По форме нейрон спинномозгового узла является:","options":["псевдоуниполярным","биполярным","мультиполярным","униполярным","корзинчатым"],"correctAnswer":[0]},{"question":"Чувствительные ядра:","options":["образованы телами чувствительных нейронов","образованы телами вставочных (ассоциативных) нейронов","служат местом, где оканчиваются чувствительные волокна нервов","служат местом, где начинаются чувствительные волокна нервов","их повреждение проявляется потерей чувствительности в области, подконтрольной соответствующему нерву"],"correctAnswer":[1,2,4]},{"question":"Двигательные ядра:","options":["образованы телами двигательных соматических нейронов","образованы телами двигательных висцеральных нейронов","образованы телами вставочных (ассоциативных) нейронов","служат местом, где начинаются двигательные волокна нервов","их повреждение проявляется периферическим параличом группы мышц, подконтрольной соответствующему нерву"],"correctAnswer":[0,3,4]},{"question":"Собственные пучки спинного мозга:","options":["являются наружными компонентами канатиков спинного мозга","являются наружными компонентами столбов спинного мозга","являются внутренними компонентами канатиков спинного мозга","обеспечивают межсегментарные связи спинного мозга","обеспечивают связи спинного мозга с головным мозгом"],"correctAnswer":[2,3]},{"question":"Твердая оболочка спинного мозга (dura mater spinalis) располагается:","options":["в позвоночном канале (canalis vertebralis)","снаружи от паутинной оболочки спинного мозга (arachnoidea mater spinalis)","кнутри от паутинной оболочки спинного мозга (arachnoidea mater spinalis)","кнутри от мягкой оболочки спинного мозга (pia mater spinalis)","окружает центральный канал (canalis centralis)"],"correctAnswer":[0,1]},{"question":"Эпидуральное пространство (spatium epidurale):","options":["содержит переднее внутреннее позвоночное венозное сплетение (plexus venosus vertebralis internus anterior)","заполнено жировой тканью","потенциальное пространство, которое не существует в норме","заполнено спинномозговой жидкостью (liquor cerebrospinalis)","отсутствует"],"correctAnswer":[0,1]},{"question":"Мягкая оболочка спинного мозга (pia mater spinalis):","options":["прилежит к спинному мозгу (medulla spinalis)","образует терминальную нить (filum terminale)","отделяется от паутинной оболочки подпаутинным пространством (spatium subarachnoideum)","лишена кровеносных сосудов","содержит кровеносные сосуды"],"correctAnswer":[0,1,2,4]},{"question":"Подпаутинное пространство (spatium subarachnoideum spinale):","options":["заполнено спинномозговой жидкостью (liquor cerebrospinalis)","содержит позвоночное венозное сплетение (plexus venosus vertebralis internus anterior)","содержит конский хвост (cauda equina)","заполнено жировой тканью","сообщается с подпаутинным пространством головного мозга (spatium subarachnoideum craniale)"],"correctAnswer":[0,2,4]},{"question":"Мозговые оболочки (meninges) представлены:","options":["мягкой оболочкой (pia mater)","паутинной оболочкой (arachnoidea mater)","твердой оболочкой (dura mater)","серозной оболочкой (tunica serosa)","слизистой оболочкой (tunica mucosa)"],"correctAnswer":[0,1,2]},{"question":"Существующие межоболочечные пространства:","options":["эпидуральное пространство (spatium epidurale)","субдуральное пространство (spatium subdurale)","надпаутинное пространство (spatium epiarachnoideum)","подпаутинное пространство (spatium subarachnoideum)","субпиальное пространство (spatium subpiale)"],"correctAnswer":[0,1,3]},{"question":"Эпидуральное пространство (spatium epidurale) спинного мозга:","options":["располагается между твердой оболочкой спинного мозга, надкостницей и межпозвоночными связками","содержит жировую ткань","содержит венозные сплетения","содержит спинномозговую жидкость (liquor cerebrospinalis)","содержит серозную жидкость"],"correctAnswer":[0,1,2]},{"question":"Субдуральное пространство (spatium subdurale) спинного мозга:","options":["располагается между твердой оболочкой спинного мозга (dura mater spinalis) и паутинной оболочкой спинного мозга (arachnoidea mater spinalis)","располагается между твердой оболочкой спинного мозга (dura mater spinalis) и мягкой оболочкой спинного мозга (pia mater\nspinalis)","содержит жировую ткань и венозные сплетения","содержит кровеносные сосуды","заканчивается на уровне межпозвоночного диска L1-L2"],"correctAnswer":[0]},{"question":"Подпаутинное пространство (spatium subarachnoideum) спинного мозга:","options":["располагается между мягкой оболочкой спинного мозга (pia mater spinalis) и паутинной оболочкой спинного мозга (arachnoidea mater spinalis)","содержит спинномозговую жидкость (liquor cerebrospinalis)","содержит конский хвост (cauda equina)","содержит кровеносные сосуды","содержит жировую ткань и венозные сплетения"],"correctAnswer":[0,1,2]},{"question":"Подпаутинное пространство (spatium subarachnoideum) головного мозга:","options":["продолжается в подпаутинное пространство (spatium subarachnoideum) спинного мозга","изолировано от подпаутинного пространства (spatium subarachnoideum) спинного мозга","содержит спинномозговую жидкость (liquor cerebrospinalis)","имеет расширенные участки (цистерны)","образует синусы, заполненные венозной кровью"],"correctAnswer":[0,2,3]},{"question":"Ствол головного мозга (truncus encephali) включает:","options":["мост (pons)","средний мозг (mesencephalon)","промежуточный мозг (diencephalon)","продолговатый мозг (medulla oblongata)","мозжечок (cerebellum)"],"correctAnswer":[0,1,3]},{"question":"В области продолговатого мозга выходят:","options":["подъязычный нерв (n.hypoglossus)","добавочный нерв (n.accessorius)","блуждающий нерв (n.vagus)","языкоглоточный нерв (n.glossopharyngeus)","лицевой нерв (n.facialis)"],"correctAnswer":[0,1,2,3]},{"question":"Место выхода глазодвигательного нерва (n.oculomotorius):","options":["медиальная поверхность ножки мозга (pedunculus cerebri)","верхний мозговой парус (velum medullare superius)","латеральная поверхность продолговатого мозга (medulla oblongata)","мостомозжечковый угол (angulus pontocerebellaris)","нижний мозговой парус (velum medullare inferius)"],"correctAnswer":[0]},{"question":"Место выхода блокового нерва (n. trochlearis) находится:","options":["на медиальной поверхности ножки мозга (pedunculus cerebri)","на верхнем мозговом парусе (velum medullare superius)","на латеральной поверхности продолговатого мозга (medulla oblongata)","в мостомозжечковом углу (angulus pontocerebellaris)","на нижнем мозговом парусе (velum medullare inferius)"],"correctAnswer":[1]},{"question":"Место выхода тройничного нерва (n. trigeminus) находится:","options":["на латеральной поверхности средней мозжечковой ножки (pedunculus cerebellaris medius)","на верхнем мозговом парусе (velum medullare superius)","на верхнем мозговом парусе (medulla oblongata)","в мостомозжечковом углу (angulus pontocerebellaris)","на ножке мозга (pedunculus cerebri)"],"correctAnswer":[0]},{"question":"Место выхода отводящего нерва (n. abducens) находится:","options":["на латеральной поверхности средней мозжечковой ножки (pedunculus cerebellaris medius)","между мостом и пирамидами продолговатого мозга","на латеральной поверхности продолговатого мозга (medulla oblongata)","в мостомозжечковом углу (angulus pontocerebellaris)","на ножке мозга (pedunculus cerebri)"],"correctAnswer":[1]},{"question":"Место выхода лицевого нерва (n. facialis) находится:","options":["в мостомозжечковом углу (angulus pontocerebellaris)","на верхнем мозговом парусе (velum medullare superius)","на латеральной поверхности продолговатого мозга (medulla oblongata)","на латеральной поверхности средней мозжечковой ножки (pedunculus cerebellaris medius)","на ножке мозга (pedunculus cerebri)"],"correctAnswer":[0]},{"question":"Место выхода преддверно-улиткового нерва (n.vestibulocochlearis) находится:","options":["в мостомозжечковом углу (angulus pontocerebellaris)","на верхнем мозговом парусе (velum medullare superius)","на латеральной поверхности продолговатого мозга (medulla oblongata)","на латеральной поверхности средней мозжечковой ножки (pedunculus cerebellaris medius)","на ножке мозга (pedunculus cerebri)"],"correctAnswer":[0]},{"question":"Место выхода подъязычного нерва (n.hypoglossus) находится:","options":["в мостомозжечковом углу (angulus pontocerebellaris)","на верхнем мозговом парусе (velum medullare superius)","в передней латеральной борозде (sulcus anterolateralis) продолговатого мозга","на латеральной поверхности средней мозжечковой ножки (pedunculus cerebellaris medius)","на ножке мозга (pedunculus cerebri)"],"correctAnswer":[2]},{"question":"На вентральной поверхности продолговатого мозга находятся:","options":["оливы (oliva)","пирамиды (pyramis medullae oblongatae)","перекрест пирамид (decussatio pyramidum)","ножки мозга (pedunculus cerebri)","бугорок тонкого ядра (tuberculum gracile)"],"correctAnswer":[0,1,2]},{"question":"Пирамиды продолговатого мозга (pyramis medullae oblongatae) располагаются:","options":["медиальнее олив (oliva)","латеральнее олив (oliva)","по бокам от передней срединной щели (fissura mediana anterior)","по бокам от базилярной борозды (sulcus basilaris)","по бокам от задней срединной борозды (sulcus medianus posterior)"],"correctAnswer":[0,2]},{"question":"Перекрест пирамид (decussatio pyramidum) располагается:","options":["на вентральной поверхности продолговатого мозга","внутри передней срединной щели (fissura mediana anterior) продолговатого мозга","внутри задней срединной борозды (sulcus medianus posterior) продолговатого мозга","между ножек мозга (pedunculus cerebri)","внутри базилярной борозды (sulcus basilaris)"],"correctAnswer":[0,1]},{"question":"Образования дорсальной поверхности продолговатого мозга (medulla oblongata):","options":["бугорок клиновидного ядра (tuberculum cuneatum)","ромбовидная ямка (fossa rhomboidea)","бугорок тонкого ядра (tuberculum gracilis)","олива (oliva)","пирамида продолговатого мозга (pyramis medullae oblongatae)"],"correctAnswer":[0,1,2]},{"question":"На вентральной поверхности среднего мозга (mesencephalon) находятся:","options":["ножки мозга (pedunculus cerebri)","межножковая ямка (fossa interpeduncularis)","заднее продырявленное вещество (substantia perforata posterior)","верхние мозжечковые ножки (pedunculus cerebellaris superior)","пластинка четверохолмия (lamina quadrigemina, lamina tecti)"],"correctAnswer":[0,1,2]},{"question":"Межножковая ямка (fossa interpeduncularis) располагается:","options":["между ножками мозга (pedunculus cerebri)","на вентральной поверхности ствола головного мозга (truncus encephali)","между верхними мозжечковыми ножками (pedunculus cerebellaris superior)","на дорсальной поверхности ствола головного мозга (truncus encephali)","между нижними мозжечковыми ножками (pedunculus cerebellaris inferior)"],"correctAnswer":[0,1]},{"question":"На вентральной поверхности среднего мозга располагаются:","options":["место выхода глазодвигательного нерва (n.oculomotorius)","заднее продырявленное вещество (substantia perforata posterior)","межножковая ямка (fossa interpeduncularis)","место выхода блокового нерва (n.trochlearis)","верхние мозжечковые ножки (pedunculus cerebellaris superior)"],"correctAnswer":[0,1,2]},{"question":"На дорсальной поверхности среднего мозга (mesencephalon) находятся:","options":["пластинка четверохолмия (lamina quadrigemina, lamina tecti)","нижний мозговой парус (velum medullare inferius)","средние мозжечковые ножки (pedunculus cerebellaris medius)","ножки мозга (pedunculus cerebri)","оливы (oliva)"],"correctAnswer":[0]},{"question":"Ромбовидная ямка (fossa rhomboidea) ограничена:","options":["верхними мозжечковыми ножками (pedunculus cerebellaris superior)","нижними мозжечковыми ножками (pedunculus cerebellaris inferior)","ручками нижних холмиков (brachium colliculi inferioris)","ножками мозга (pedunculus cerebri)","ручками верхних холмиков (brachium colliculi superioris)"],"correctAnswer":[0,1]},{"question":"Рельеф ромбовидной ямки (fossa rhomboidea) составляют:","options":["срединная борозда (sulcus medianus)","медиальное возвышение (eminentia medialis)","лицевой бугорок (colliculus facialis)","бугорок тонкого ядра (tuberculum gracile)","бугорок клиновидного ядра (tuberculum cuneatum)"],"correctAnswer":[0,1,2]},{"question":"Рельеф ромбовидной ямки (fossa rhomboidea) составляют:","options":["мозговые полоски IV желудочка (striae medullares ventriculi quarti)","треугольник подъязычного нерва (trigonum n.hypoglossi)","вестибулярное поле (area vestibularis)","верхний холмик (colliculus superior)","нижний холмик (colliculus inferior)"],"correctAnswer":[0,1,2]},{"question":"К чувствительным ядрам черепных нервов относятся:","options":["ядра одиночного пути (nuclei tractus solitarii)","спинномозговое ядро тройничного нерва (nucleus spinalis n. trigemini)","верхнее слюноотделительное ядро (nucleus salivatorius superior)","двойное ядро (nucleus ambiguus)","дорсальное ядро блуждающего нерва (nucleus dorsalis n. vagi)"],"correctAnswer":[0,1]},{"question":"К вегетативным ядрам черепных нервов относятся:","options":["верхнее слюноотделительное ядро (nucleus salivatorius superior)","дорсальное ядро блуждающего нерва (nucleus dorsalis n.vagi)","спинномозговое ядро тройничного нерва (nucleus spinalis n. trigemini)","нижнее слюноотделительное ядро (nucleus salivatorius inferior)","двойное ядро (nucleus ambiguus)"],"correctAnswer":[0,1,3]},{"question":"К двигательным ядрам черепных нервов относятся:","options":["ядро подъязычного нерва (nucleus n. hypoglossi)","двойное ядро (nucleus ambiguus)","спинномозговое ядро тройничного нерва (nucleus spinalis n. trigemini)","ядро одиночного пути (nuclei tractus solitarii)","дорсальное ядро блуждающего нерва (nucleus dorsalis n.vagi)"],"correctAnswer":[0,1]},{"question":"К чувствительным ядрам тройничного нерва (n. trigeminus) относятся:","options":["среднемозговое ядро тройничного нерва (nucleus mesencephalicus n. trigemini)","главное ядро тройничного нерва (nucleus principalis n. trigemini)","спинномозговое ядро тройничного нерва (nucleus spinalis n. trigemini)","двойное ядро (nucleus ambiguus)","ядро одиночного пути  (nucleus tractus solitarii)"],"correctAnswer":[0,1,2]},{"question":"Добавочные ядра глазодвигательного нерва (nuclei accessorii n.oculomotorii):","options":["по природе вегетативные","находятся в центральном сером веществе (substantia grisea centralis)","располагаются ниже водопровода мозга (aqueductus cerebri)","проецируются на уровне верхнего холмика (colliculus superior)","по природе двигательные соматические"],"correctAnswer":[0,1,2,3]},{"question":"К ядрам тройничного нерва (n. trigeminus) относятся:","options":["спинномозговое ядро тройничного нерва (nucleus spinalis n. trigemini)","главное ядро тройничного нерва (nucleus principalis n. trigemini)","верхнее слюноотделительное ядро (nucleus salivatorius superior)","ядро одиночного пути (nucleus tractus solitarii)","двойное ядро (nucleus ambiguus)"],"correctAnswer":[0,1]},{"question":"Ядро отводящего нерва (nucleus n. abducentis) локализуется в области:","options":["лицевого бугорка (colliculus facialis)","верхнего холмика (colliculus superior)","нижнего холмика (colliculus inferior)","бугорка клиновидного ядра (tuberculum cuneatum)","бугорка тонкого ядра (tuberculum gracile)"],"correctAnswer":[0]},{"question":"К ядрам лицевого нерва (n. facialis) относятся:","options":["верхнее слюноотделительное ядро (nucleus salivatorius superior)","ядро одиночного пути (nuclei tractus solitarii)","ядро лицевого нерва (nucleus nervi facialis)","улитковые ядра (nuclei cochleares)","двойное ядро (nucleus ambiguus)"],"correctAnswer":[0,1,2]},{"question":"Ядра черепных нервов располагаются:","options":["в крыше ствола головного мозга (truncus encephali)","в покрышке ствола головного мозга","в основании ствола головного мозга","в стволе головного мозга и в промежуточном мозге","только в стволе головного мозга (truncus encephali)"],"correctAnswer":[1,4]},{"question":"Черепные нервы, имеющие только двигательные ядра:","options":["глазодвигательный нерв (n. oculomotorius)","блоковый нерв (n. trochlearis)","добавочный нерв (n. accessorius)","отводящий нерв (n. abducens)","языкоглоточный нерв (n. glossopharyngeus)"],"correctAnswer":[1,2,3]},{"question":"Черепные нервы, имеющие только чувствительные ядра:","options":["тройничный нерв (n. trigeminus)","лицевой нерв (n. facialis)","преддверно-улитковый нерв (n. vestibulocochlearis)","подъязычный нерв (n. hypoglossus)","языкоглоточный нерв (n. glossopharyngeus)"],"correctAnswer":[2]},{"question":"Ядро одиночного пути (nucleus tractus solitarii) является общим для:","options":["лицевого нерва (n. facialis)","языкоглоточного нерва (n. glossopharyngeus)","блуждающего нерва (n. vagus)","преддверноулиткового нерва (n. vestibulocochlearis)","добавочного нерва (n. accessorius)"],"correctAnswer":[0,1,2]},{"question":"Ядра блуждающего нерва (n. vagus):","options":["дорсальное (заднее) ядро (nucleus dorsalis)","ядро одиночного пути (nucleus tractus solitarii)","двойное ядро (nucleus ambiguus)","нижнее слюноотделительное ядро (nucleus salivatorius inferior)","тонкое ядро (nucleus gracilis)"],"correctAnswer":[0,1,2]},{"question":"Двойное ядро (nucleus ambiguus) является общим для:","options":["языкоглоточного нерва (n. glossopharyngeus)","блуждающего нерва (n. vagus)","отводящего (n. abducens)","лицевого нерва (n. facialis)","преддверноулиткового нерва (n. vestibulocochlearis)"],"correctAnswer":[0,1]},{"question":"Белое вещество продолговатого мозга (medulla oblongata) составляют:","options":["пирамида продолговатого мозга (pyramis medullae oblongatae)","клиновидный пучок (fasciculus cuneatus)","олива (oliva)","тонкий пучок (fasciculus gracilis)","медиальная петля (lemniscus medialis)"],"correctAnswer":[0,1,3,4]},{"question":"Пирамида продолговатого мозга (pyramis medullae oblongatae) - это:","options":["пучок нервных волокон","структура, которая располагается на вентральной поверхности ствола головного мозга (truncus encephali)","скопление тел нейронов","структура, которая располагается в толще продолговатого мозга (medulla oblongata)","структура, которая располагается на дорсальной поверхности ствола головного мозга (truncus encephali)"],"correctAnswer":[0,1]},{"question":"К восходящим путям продолговатого мозга (medulla oblongata) относят:","options":["тонкий пучок (fasciculus gracilis)","спинномозговую петля (lemniscus spinalis)","медиальнкю петлю (lemniscus medialis)","крышеспинномозговой путь (tractus tectospinalis)","корковоспинномозговые пути (tractus corticispinales)"],"correctAnswer":[0,1,2]},{"question":"К нисходящим путям продолговатого мозга (medulla oblongata) относятся:","options":["крышеспинномозговой путь (tractus tectospinalis)","красноядерноспинномозговой путь (tractus rubrospinalis)","пирамидные пути (tractus pyramidalis)","клиновидный пучок (fasciculus cuneatus)","медиальная петля (lemniscus medialis)"],"correctAnswer":[0,1,2]},{"question":"Нервные тракты, образующие перекресты на уровне продолговатого мозга (medulla oblongata):","options":["медиальная петля (lemniscus medialis)","спинномозговая петля (lemniscus spinalis)","пирамидные пути (tractus pyramidalis)","красноядерноспинномозговой путь (tractus rubrospinalis)","крышеспинномозговой путь (tractus tectospinalis)"],"correctAnswer":[0,2]},{"question":"В продолговатом мозге (medulla oblongata) залегают:","options":["дорсальное ядро блуждаю (nucleus dorsalis n.vagi)","нижнее слюноотделительное ядро (nucleus salivatorius inferior)","ядро подъязычного нерва (nucleus n. hypoglossi)","ядра одиночного пути (nuclei tractus solitarii)","ядро лицевого нерва (nucleus n. facialis)"],"correctAnswer":[0,1,2,3]},{"question":"Трапециевидное тело (corpus trapezoidum):","options":["это компонент среднего мозга (mesencephalon)","представляет собой серое вещество","состоит из волокон слухового пути","ориентировано вертикально на поперечном срезе моста","служит границей между покрышкой и базилярной частью моста"],"correctAnswer":[2,4]},{"question":"Покрышка моста (tegmentum pontis) отделяется от базилярной части моста (pars basilaris pontis) посредством:","options":["трапециевидного тела (corpus trapezoideum)","четвертого (IV) желудочка (ventriculus quartus)","черного вещества (substantia nigra)","верхнего и нижнего мозгового паруса (velum medullare superius et inferius)","ножек мозжечка (pedunculi cerebellares)"],"correctAnswer":[0]},{"question":"Базилярная часть моста (pars basilaris pontis) содержит:","options":["ядра моста (nuclei pontis)","корково-мостовые волокна (fibrae corticopontinae)","корково-ядерные волокна (fibrae corticonucleares)","корково-спинномозговые волокна (fibrae corticospinales)","ретикулярную формацию (formatio reticularis)"],"correctAnswer":[0,1,2,3]},{"question":"Ядра (собственные) моста (nuclei pontis):","options":["места окончания корково-мостовых волокон (fibrae corticopontinae)","структуры, расположенные в базилярной части моста (pars basilaris pontis)","структуры, расположенные в базилярной части и покрышке моста (pars basilaris et tegmentum pontis)","структуры, расположенные в покрышке моста (tegmentum pontis)","места окончания корково-ядерных волокон (fibrae corticonucleares)"],"correctAnswer":[0,1]},{"question":"Соединение моста с мозжечком осуществляется с помощью:","options":["нижних мозжечковых ножек (pedunculi cerebellares inferiors)","ножек мозга (pedunculi cerebebri)","средних мозжечковых ножек (pedunculi cerebellares medii)","трапециевидного тела (corpus trapezoideum)","верхних мозжечковых ножек (pedunculi cerebellares superiores)"],"correctAnswer":[2]},{"question":"Чувствительные ядра черепных нервов в составе моста:","options":["главное ядро тройничного нерва (nucleus principalis n. trigemini)","ядро отводящего нерва (nucleus n. abducentis)","улитковые ядра (nuclei cochleares)","вестибулярные ядра (nuclei vestibulares)","двойное ядро (nucleus ambiguous)"],"correctAnswer":[0,2,3]},{"question":"В покрышке моста залегают двигательные ядра черепных нервов (tegmentum pontis):","options":["спинномозговое ядро тройничного нерва (nucleus spinalis n. trigemini)","ядро отводящего нерва (nucleus n. abducentis)","двигательное ядро тройничного нерва (nucleus motorius n. trigemini)","ядро лицевого нерва (nucleus n. facialis)","двойное ядро (nucleus ambiguous)"],"correctAnswer":[1,2,3]},{"question":"Средний мозг (mesencephalon) состоит из:","options":["крыши (tectum)","покрышки (tegmentum)","основания (basis)","переднего столба (columna anterior)","заднего столба (columna posterior)"],"correctAnswer":[0,1,2]},{"question":"Крышу среднего мозга (tectum mesencephali) представляют:","options":["верхние холмики (colliculus superior)","нижние холмики (colliculus inferior)","ножки мозга (pedunculi cerebebri)","средние мозжечковые ножки (pedunculi cerebellares medii)","эпиталамус (epithalamus)"],"correctAnswer":[0,1]},{"question":"Граница между крышей и покрышкой среднего мозга:","options":["водопровод мозга (aqueductus cerebri)","черное вещество (substantia nigra)","пластинка четверохолмия (lamina quadrigemina)","трапециевидное тело (corpus trapezoideum)","красное ядро (nucleus ruber)"],"correctAnswer":[0]},{"question":"Черное вещество (substantia nigra) разделяет:","options":["покрышку среднего мозга (tegmentum mesencephali) и основание ножки (basis pedunculi)","крышу среднего мозга (tectum mesencephali) и ножку мозга (pedunculus cerebri)","покрышку (tegmentum) и крышу среднего мозга (tectum mesencephali)","правую и левую ножки мозга (pedunculi cerebri)","верхние и нижние холмики (colliculus superior et inferior)"],"correctAnswer":[0]},{"question":"Крышу среднего мозга (tectum mesencephali) представляют:","options":["пластинка четверохолмия (lamina quadrigemina)","ручки верхнего и нижнего холмиков (brachium colliculi superioris et inferioris)","центральное серое вещество (substantia grisea centralis)","латеральное и медиальное коленчатые тела (corpus geniculatum mediale et laterale)","треугольник латеральной петли (trigonum lemnisci lateralis)"],"correctAnswer":[0,1]},{"question":"Крыша среднего мозга (tectum mesencephali) содержит:","options":["подкорковые центры зрения","подкорковые центры слуха","компоненты экстрапирамидной системы","компоненты пирамидной системы","ядра черепных нервов"],"correctAnswer":[0,1,2]},{"question":"Серое вещество покрышки среднего мозга (tegmentum mesencephali) представлено:","options":["центральным серым веществом (substantia grisea centralis)","красными ядрами (nucleus ruber)","ретикулярной формацией (formatio reticularis)","субталамическим ядром (nucleus subthalamicus)","паравентрикулярными ядрами (nucleus paraventricularis)"],"correctAnswer":[0,1,2]},{"question":"Красное ядро (nucleus ruber):","options":["располагается в покрышке среднего мозга (tegmentum mesencephali)","относится к центрам экстрапирамидной системы","находится в основании ножки (basis pedunculi) большого мозга","служит границей между основанием ножки (basis pedunculi) мозга и покрышкой среднего мозга (tegmentum mesencephali)","относится к надсегментарным центрам ствола головного мозга (truncus encephali)"],"correctAnswer":[0,1,4]},{"question":"Белое вещество покрышки среднего мозга (tegmentum mesencephali) содержит:","options":["медиальный продольный пучок (fasciculus longitudinalis medialis)","латеральную петлю (lemniscus lateralis)","медиальную петлю (lemniscus medialis)","корково-мостовой путь (tractus corticopontinus)","корково-спинномозговые волокна (fibrae corticospinales)"],"correctAnswer":[0,1,2]},{"question":"Восходящими путями в покрышке среднего мозга (tegmentum mesencephali) являются:","options":["спинномозговая петля (lemniscus spinalis)","медиальная петля (lemniscus medialis)","латеральная петля (lemniscus lateralis)","передний спиномозжечковый путь (tractus spinocerebellaris anterior)","задний спиномозжечковый путь (tractus spinocerebellaris posterior)"],"correctAnswer":[0,1,2]},{"question":"Основание ножки (basis pedunculi) мозга содержит:","options":["нисходящие пути","восходящие пути","сегментарные центры","ядра черепных нервов","ретикулярную формацию (formatio reticularis)"],"correctAnswer":[0]},{"question":"Основание ножки (basis pedunculi) мозга в своем составе имеет:","options":["корково-ядерные волокна (fibrae corticonucleares)","корково-спинномозговые волокна (fibrae corticospinales)","корково-мостовые волокна (fibrae corticopontini)","красноядерно-спинномозговой путь (tractus rubrospinalis)","передний спиномозжечковый путь (tractus spinocerebellaris anterior)"],"correctAnswer":[0,1,2]},{"question":"Мозжечок (cerebellum) является частью:","options":["заднего мозга (metencephalon)","конечного мозга (telencephalon)","ствола головного мозга (truncus encephali)","промежуточного мозга (diencephalon)","среднего мозга (mesencephalon)"],"correctAnswer":[0]},{"question":"Основными частями мозжечка (cerebellum) являются:","options":["червь мозжечка (vermis cerebelli)","полушария мозжечка (hemispheria cerebelli)","мозжечковые ножки (pedunculi cerebellares)","зубчатое ядро (nucleus dentatus)","«дерево жизни» (arbor vitae)"],"correctAnswer":[0,1]},{"question":"Ядрами мозжечка являются:","options":["зубчатое ядро (nucleus dentatus)","ядро шатра (nucleus fastigii)","пробковидное ядро (nucleus emboliformis)","шаровидное ядро (nucleus globosus)","двойное ядро (nucleus ambiguus)"],"correctAnswer":[0,1,2,3]},{"question":"Клочок - это:","options":["парный компонент полушарий мозжечка (hemispheria cerebelli)","относится к вестибулярному мозжечку(vestibulocerebellum)","компонент червя мозжечка (vermis cerebelli)","относится к новой части мозжечка (neocerebellum)","относится к древней части мозжечка (paleocerebellum)"],"correctAnswer":[0,1]},{"question":"Структуры, относящиеся к древней части мозжечка (archicerebellum):","options":["клочок (flocculus)","узелок (nodulus)","ядро шатра (nucleus fastigii)","зубчатое ядро (nucleus dentatus)","шаровидное ядро (nucleus globosus)"],"correctAnswer":[0,1,2]},{"question":"Старая часть мозжечка (paleocerebellum) включает:","options":["червь мозжечка (vermis cerebelli)","пробковидное ядро (nucleus emboliformis)","шаровидное ядро (nucleus globosus)","ядро шатра (nucleus fastigii)","зубчатое ядро (nucleus dentatus)"],"correctAnswer":[0,1,2]},{"question":"Новая часть мозжечка (neocerebellum) включает в себя:","options":["зубчатое ядро (nucleus dentatus)","полушария мозжечка (hemispheria cerebelli)","олива (oliva)","червь (vermis)","клочок (flocculus)"],"correctAnswer":[0]},{"question":"Нижние мозжечковые ножки (pedunculus cerebellaris inferior):","options":["соединяют мозжечок с продолговатым мозгом (medulla oblongata)","содержат задний спиномозжечковый путь (tractus spinocerebellaris posterior)","содержат ядра мозжечка (nuclei cerebelli)","соединяют мозжечок (cerebellum) с мостом","содержат мостомозжечковые волокна (fibrae pontocerebellares)"],"correctAnswer":[0,1]},{"question":"Средние мозжечковые ножки (pedunculus cerebellaris medius):","options":["соединяют мозжечок и мост","содержат мостомозжечковые волокна (fibrae pontocerebellares)","это самые толстые ножки мозжечка","соединяют мозжечок и средний мозг (mesencephalon)","содержат передний спиномозжечковый путь (tractus spinocerebellaris anterior)"],"correctAnswer":[0,1,2]},{"question":"Верхние мозжечковые ножки (pedunculus cerebellaris superior):","options":["соединяют мозжечок (cerebellum) со средним мозгом (mesencephalon)","содержат передний спиномозжечковый путь (tractus spinocerebellaris anterior)","соединяют мозжечок (cerebellum) с мостом","соединяют мозжечок (cerebellum) промежуточным мозгом","содержат мостомозжечковые волокна (fibrae pontocerebellares)"],"correctAnswer":[0,1]},{"question":"Ромбовидная ямка (fossa rhomboidea):","options":["образует дно четвертого (IV) желудочка (ventriculus quartus)","образуют крышу четвертого (IV) желудочка (ventriculus quartus)","образована дорсальной поверхностью всего ствола головного мозга (truncus encephali)","образована дорсальной поверхностью моста (pons) и продолговатого мозга (medulla oblongata)","служит для описания проекции ядер черепных нервов"],"correctAnswer":[0,3,4]},{"question":"Срединная апертура (apertura mediana) четвертого желудочка:","options":["соединяет четвертый (IV) желудочек (ventriculus quartus) с подпаутинным пространством (spatium subarachnoideum)","именуется отверстием Маженди (Magendie)","соединяет четвертый (IV) желудочек (ventriculus quartus) с центральным каналом (canalis centralis)","соединяет четвертый (IV) желудочек (ventriculus quartus) с субдуральным пространством (spatium subdurale)","именуется отверстием Люшка (Luschka)"],"correctAnswer":[0,1]},{"question":"Латеральная апертура (apertura lateralis) четвертого желудочка:","options":["соединяет четвертый (IV) желудочек (ventriculus quartus) с подпаутинным пространством (spatium subarachnoideum)","именуется отверстием Люшка (Luschka)","соединяет четвертый (IV) желудочек (ventriculus quartus) с субдуральным пространством (spatium subdurale)","соединяет четвертый (IV) желудочек (ventriculus quartus) с центральным каналом (canalis centralis)","именуется отверстием Маженди (Magendie)"],"correctAnswer":[0,1]},{"question":"К промежуточному мозгу (diencephalon) относят:","options":["таламус (thalamus)","метаталамус (metathalamus)","эпиталамус (epithalamus)","гипоталамус (hypothalamus)","четвертый (IV) желудочек (ventriculus quartus)"],"correctAnswer":[0,1,2,3]},{"question":"Промежуточный мозг (diencephalon):","options":["имеет полость - третий (III) желудочек (ventriculus tertius)","является производным переднего мозга (prosencephalon)","является частью ствола головного мозга (truncus encephali)","является частью конечного мозга (telencephalon)","является производным заднего мозга (rhombencephalon)"],"correctAnswer":[0,1]},{"question":"В таламусе (thalamus) выделяют:","options":["подушку (pulvinar)","межталамическое сращение (adhesio interthalamica)","передний бугорок (tuberculum anterius)","шишковидное тело (corpus pineale)","зрительный перекрест (chiasma opticum)"],"correctAnswer":[0,1,2]},{"question":"Эпиталамус (epithalamus) в своем составе имеет:","options":["поводки (habenula)","шишковидное тело (corpus pineale)","спайку поводков (commissura habenularum)","треугольники поводков (trigonum habenulare)","коленчатые тела (corpora geniculata)"],"correctAnswer":[0,1,2,3]},{"question":"Метаталамус (metathalamus) в своем составе имеет:","options":["латеральные и медиальные коленчатые тела (corpus geniculatum laterale et mediale)","подушку таламуса (pulvinar thalami)","поводок (habenula)","воронку (infundibulum)","ручки холмиков (brachia colliculi)"],"correctAnswer":[0]},{"question":"Гипоталамус (hypothalamus) в своем составе имеет:","options":["зрительный перекрест (chiasma opticum)","воронку (infundibulum)","зрительный тракт (tractus opticus)","зрительные нервы (nervi optici)","коленчатые тела (corpora geniculata)"],"correctAnswer":[0,1,2]},{"question":"Сосцевидные тела (corpora mammillares) задней гипоталамической области (area hypothalamica posterior):","options":["содержат сосцевидные ядра (nuclei mammillares)","имеют связь со столбами свода (columnae fornicis)","включают паравентрикулярные и супраоптические ядра (nuclei paraventriculares et supraopticus)","функционально относятся к обонятельному мозгу и лимбической стстеме","функционально относятся к стриопаллидарной системе"],"correctAnswer":[0,1,3]},{"question":"Третий желудочек (ventriculus tertius):","options":["является полостью промежуточного мозга (diencephalon)","имеет сосудистое сплетение (plexus choroideus)","содержит спинномозговую жидкость (liquor cerebrospinalis)","является полостью среднего мозга (mesencephalon)","напрямую сообщается с подпаутинным пространством (spatium subarachnoideum)"],"correctAnswer":[0,1,2]},{"question":"Межжелудочковое отверстие (foramen interventriculare):","options":["является сообщением между третьим (III) и четвертым (IV) желудочками","является сообщением между третьим (III) и боковыми желудочками","ограничен таламусами и столбами свода (columna fornicis)","проводит спинномозговую жидкость из желудочков головного мозга в подпаутинное пространство (spatium subarachnoideum)","является парным образованием"],"correctAnswer":[1,2,4]},{"question":"Передняя стенка третьего (III) желудочка (ventriculus tertius) образована:","options":["столбами свода (columnae fornicis)","терминальной пластинкой (lamina terminalis)","передней спайкой (commissura anterior)","ножками мозга (peduculi cerebri)","мозолистым телом (corpus callosum)"],"correctAnswer":[0,1,2]},{"question":"Между оградой (claustrum) и чечевицеобразным ядром (nucleus lentiformis) расположена:","options":["самая наружная капсула (capsula extrema)","наружная капсула (capsula externa)","внутренняя капсула (capsula interna)","скорлупа (putamen)","терминальная пластинка (lamina terminalis)"],"correctAnswer":[1]},{"question":"Чечевицеобразное ядро (nucleus lentiformis), хвостатое ядро (nucleus caudatus) и таламус (thalamus) отделены друг от друга\nпосредством:","options":["внутренняя капсула (capsula interna)","самая наружная капсула (capsula extrema)","наружная капсула (capsula externa)","мозговые полоски таламуса (stria mdullaris thalami)","терминальная пластинка (lamina terminalis)"],"correctAnswer":[0]},{"question":"Стриатум (striatum) имеет в своем составе:","options":["хвостатое ядро (nucleus caudatus)","скорлупу (putamen)","красное ядро (nucleus rubere)","ограду (claustrum)","таламус (thalamus)"],"correctAnswer":[0,1]},{"question":"Части хвостатого ядра (nucleus caudatus):","options":["головка (caput)","тело (corpus)","хвост (cauda)","туловище (truncus)","клюв (rostrum)"],"correctAnswer":[0,1,2]},{"question":"В состав стриопаллидарной системы входят:","options":["хвостатое ядро (nucleus caudatus)","скорлупа (putamen)","бледный шар (globus pallidus)","ограда (claustrum)","гиппокамп (hippocampus)"],"correctAnswer":[0,1,2]},{"question":"Отделы бокового желудочка (ventriculus lateralis):","options":["центральная часть (pars centralis)","передний рог (cornu anterius)","задний рог (cornu posterius)","нижний рог (cornu inferius)","верхний рог (cornu superius)"],"correctAnswer":[0,1,2,3]},{"question":"Передний рог (cornu anterius) бокового желудочка располагается:","options":["в лобной доле (lobus frontalis)","в теменной доле (lobus parietalis)","в височной доле (lobus temporalis)","в затылочной доле (lobus occipitalis)","в островке (insula)"],"correctAnswer":[0]},{"question":"Задний рог (cornu posterius) бокового желудочка располагается:","options":["в затылочной доле (lobus occipitalis)","в лобной доле (lobus frontalis)","в теменной доле (lobus parietalis)","в височной доле (lobus temporalis)","в островке (insula)"],"correctAnswer":[0]},{"question":"Нижний рог (cornu inferius) бокового желудочка располагается:","options":["в височной доле (lobus temporalis)","в лобной доле (lobus frontalis)","в теменной доле (lobus parietalis)","в затылочной доле (lobus occipitalis)","в островке (insula)"],"correctAnswer":[0]},{"question":"Боковые желудочки сообщаются с третьим желудочком посредством:","options":["межжелудочкового отверстия (foramen interventriculare)","срединной апертуры (apertura mediana)","латеральной апертуры (apertura lateralis)","водопровода мозга (aqueductus cerebri)","подпаутинного пространства (spatium subarachnoideum)"],"correctAnswer":[0]},{"question":"Четвертый желудочек сообщается с подпаутинным пространством (spatium subarachnoideum) при помощи:","options":["срединной апертуры (apertura mediana)","латеральной апертуры (apertura lateralis)","центрального канала (canalis centralis)","межжелудочкового отверстия (foramen interventriculare)","водопровода мозга (aqueductus cerebri)"],"correctAnswer":[0,1]},{"question":"Большой мозг разделяется на правое и левое полушарие (hemispherium cerebri):","options":["продольной щелью большого мозга (fissura longitudinalis cerebri)","поперечной щелью большого мозга (fissura transversa cerebri)","центральной бороздой (sulcus centralis)","латеральной бороздой (sulcus lateralis)","поясной бороздой (sulcus cinguli)"],"correctAnswer":[0]},{"question":"Углубления на поверхности полушарий большого мозга (hemispheria cerebri) описываются как:","options":["борозды большого мозга (sulci cerebri)","извилины большого мозга (gyri cerebri)","вырезки (incisurae)","ямки (foveae)","каналы (canales)"],"correctAnswer":[0]},{"question":"Возвышения на поверхности полушарий большого мозга (hemispheria cerebri) описываются как:","options":["извилины большого мозга (gyri cerebri)","полоски (stria)","узелки (nodules)","бугорки (tuberculi)","листки (folia)"],"correctAnswer":[0]},{"question":"Главными составляющими конечного мозга (telencephalon) являются:","options":["плащ (pallium)","базальные ядра (nuclei basales)","обонятельный мозг (rhinencephalon)","зрительные бугры (thalamus)","мозжечок (cerebellum)"],"correctAnswer":[0,1,2]},{"question":"Полушария большого мозга (hemispherium cerebri) связаны между собой при помощи:","options":["мозолистого тела (corpus callosum)","спайки свода (comissura fornicis)","передней спайки (comissuraanterior)","перешейка (isthmus)","моста (pons)"],"correctAnswer":[0,1,2]},{"question":"Височная доля (lobus temporalis), лобная доля (lobus frontalis) и теменная доля (lobus parietalis) отделяются друг от друга при\nпомощи:","options":["латеральной (Сильвиевой) борозды (sulcus lateralis)","центральной (Роландовой) борозды (sulcus centralis)","теменно-затылочной борозды (sulcus parietooccipitalis)","верхней височной борозды (sulcus temporalis superior)","нижней лобной борозды (sulcus frontalis inferior)"],"correctAnswer":[0]},{"question":"Лобная доля (lobus frontalis) отделяется от теменной доли (lobus parietalis):","options":["центральной (Роландовой) бороздой (sulcus centralis)","латеральной (Сильвиевой) бороздой (sulcus lateralis)","теменно-затылочной бороздой (sulcus parietooccipitalis)","верхней височной бороздой (sulcus temporalis superior)","нижней лобной бороздой (sulcus frontalis inferior)"],"correctAnswer":[0]},{"question":"Теменная доля (lobus parietalis) отделяется от затылочной доли (lobus occipitalis):","options":["теменно-затылочной бороздой (sulcus parietooccipitalis)","латеральной (Сильвиевой) бороздой (sulcus lateralis)","центральной (Роландовой) бороздой (sulcus centralis)","верхней височной бороздой (sulcus temporalis superior)","нижней лобной бороздой (sulcus frontalis inferior)"],"correctAnswer":[0]},{"question":"К серому веществу полушарий большого мозга относят:","options":["кору большого мозга (cortex cerebri)","базальные ядра (nuclei basales)","мозолистое тело (corpus callosum)","внутреннюю капсулу (capsula interna)","свод (fornix)"],"correctAnswer":[0,1]},{"question":"В составе белого вещества полушарий большого мозга имеются:","options":["мозолистое тело (corpus callosum)","свод (fornix)","внутренняя капсула (capsula interna)","миндалевидное тело (corpus amygdaloideum)","клин (cuneus)"],"correctAnswer":[0,1,2]},{"question":"Полость конечного мозга (telencephalon) представлена:","options":["левым боковым желудочком (ventriculus lateralis sinister)","правым боковым желудочком (ventriculus lateralis dexter)","четвертым (IV) желудочком (ventriculus quartus)","третьим (III) желудочком (ventriculus tertius)","водопроводом мозга (aqueductus cerebri)"],"correctAnswer":[0,1]},{"question":"Первичная моторная зона коры головного мозга располагается в области:","options":["прецентральной извилины (g. precentralis)","постцентральнаой извилины (g. postcentralis)","нижней височной извилины (g. temporalis inferior)","верхней височной извилины (g. temporalis superior)","парагиппокампальной извилины (g. parahippocampalis)"],"correctAnswer":[0]},{"question":"Первичная соматосенсорная зона коры головного мозга располагается в области:","options":["прецентральной извилины (g. precentralis)","постцентральнаой извилины (g. postcentralis)","парацентральной дольки (lobulus paracentralis)","верхней височной извилины (g. temporalis superior)","парагиппокампальной извилины (g.s parahippocampalis)"],"correctAnswer":[1]},{"question":"Первичная зрительная зона коры головного мозга располагается в области:","options":["прецентральной извилины (g. precentralis)","шпорной борозды (sulcus calcarinus)","парацентральной дольки (lobulus paracentralis)","верхней височной извилины (g. temporalis superior)","парагиппокампальной извилины (g. parahippocampalis)"],"correctAnswer":[1]},{"question":"Первичная слуховая зона коры головного мозга располагается в области:","options":["прецентральной извилины (g. precentralis)","шпорной борозды (sulcus calcarinus)","парацентральной дольки (lobulus paracentralis)","верхней височной извилины (g. temporalis superior)","парагиппокампальной извилины (g. parahippocampalis)"],"correctAnswer":[3]},{"question":"Первичная обонятельная зона коры головного мозга располагается в области:","options":["крючка (uncus)","шпорной борозды (sulcus calcarinus)","парацентральной дольки (lobulus paracentralis)","верхней височной извилины (g. temporalis superior)","нижней лобной извилины (g. frontalis inferior)"],"correctAnswer":[0]},{"question":"Двигательный центр речи коры головного мозга (центр Брока) располагается в области:","options":["парагиппокампальной извилины (g. parahippocampalis)","шпорной борозды (sulcus calcarinus)","парацентральной дольки (lobulus paracentralis)","верхней височной извилины (g. temporalis superior)","нижней лобной извилины (g. frontalis inferior)"],"correctAnswer":[4]},{"question":"Слуховой анализатор устной речи (центр Вернике) располагается в области:","options":["парагиппокампальной извилины (g. parahippocampalis)","шпорной борозды (sulcus calcarinus)","парацентральной дольки (lobulus paracentralis)","верхней височной извилины (g. temporalis superior)","нижней лобной извилины (g. frontalis inferior)"],"correctAnswer":[3]},{"question":"Зрительный анализатор письменной речи располагается в области:","options":["угловой извилины (g. angularis)","шпорной борозды (sulcus calcarinus)","парацентральной дольки (lobulus paracentralis)","верхней височной извилины (g. temporalis superior)","нижней височной извилины (g. frontalis inferior)"],"correctAnswer":[0]},{"question":"Обонятельный мозг (rhinencephalon) включает:","options":["гиппокамп (hippocampus)","крючок (uncus)","зубчатая извилина (gyrus dentatus)","черное вещество (substantia nigra)","сводчатая извилина (g. fornicatus)"],"correctAnswer":[0,1,2,4]},{"question":"В лимбическую систему входят:","options":["гиппокамп (hippocampus)","крючок (uncus)","зубчатая извилина (gyrus dentatus)","пробковидное ядро (nucleus emboliformis)","миндалевидное тело (corpus amygdaloideum)"],"correctAnswer":[0,1,2,4]},{"question":"Нервные волокна, соединяющие правое и левое полушарие головного мозга:","options":["комиссуральные","ассоциативные","проекционные","коллатеральные","возвратные"],"correctAnswer":[0]},{"question":"Нервные волокна, соединяющие различные части одного и того же полушария головного мозга:","options":["ассоциативные","комиссуральные","проекционные","односторонние","двусторонние"],"correctAnswer":[0]},{"question":"Нервные волокна, соединяющие нервные центры головного и спинного мозга:","options":["проекционные","комиссуральные","ассоциативные","коллатеральные","возвратные"],"correctAnswer":[0]},{"question":"Комиссуральные волокна головного мозга образуют:","options":["мозолистое тело (corpus callosum)","переднюю спайку (commissura anterior)","спайку свода (commissura fornicis)","внутреннюю капсулу (capsula interna)","наружную капсулу (capsula externa)"],"correctAnswer":[0,1,2]},{"question":"Экстероцептивные пути общей чувствительности проводят импульсы от рецепторов, воспринимающих следующие виды раздражений:","options":["болевые","температурные","осязательные","уровень мышечного напряжения","уровень сухожильного напряжения"],"correctAnswer":[0,1,2]},{"question":"Тонкий пучок (fasciculus gracilis) несет чувствительную информацию:","options":["от нижних конечностей","от нижней части туловища","от головы","от верхних конечностей","от верхней части туловища"],"correctAnswer":[0,1]},{"question":"Клиновидный пучок (fasciculus cuneatus) несет чувствительную информацию:","options":["от верхних конечностей","от верхней части туловища","от головы","от нижних конечностей","от нижней части туловища"],"correctAnswer":[0,1]},{"question":"Передний и латеральный спинноталамические пути (tr. spinothalamicus anterior et lateralis) соединяясь образуют:","options":["спинномозговую петлю (lemniscus spinalis)","медиальную петлю (lemniscus medialis)","латеральную петлю (lemniscus lateralis)","тройничную петлю (lemniscus trigeminalis)","медиальный продольный пучок (fasciculus longitudinalis medialis)"],"correctAnswer":[0]},{"question":"Медиальная петля (lemniscus medialis):","options":["представляет собой комплекс перекрещенных восходящих волокон покрышки ствола головного мозга","имеет отношение к пути проприоцептивной чувствительности коркового направления","заканчивается в таламусе","имеет отношение к слуховому пути","преставляет собой комплекс перекрещенных нисходящих волокон в основании ствола головного мозга"],"correctAnswer":[0,1,2]},{"question":"Основными двигательными системами в ЦНС являются:","options":["экстрапирамидная","пирамидная","лимбическая","проприоцептивная","стриопаллидарная"],"correctAnswer":[0,1]},{"question":"К пирамидным путям относятся:","options":["передний корково-спинномозговой путь (tr. corticospinalis anterior)","латеральный корково-спинномозговой путь (tr. corticospinalis lateralis)","корково-ядерный путь (tr. corticonuclearis)","красноядерно-спинномозговой путь (tr. rubrospinalis)","крышеспинномозговой путь (tr. tectospinalis)"],"correctAnswer":[0,1,2]},{"question":"К экстрапирамидной системе относятся:","options":["красноядерно-спинномозговой путь (tr. rubrospinalis)","крышеспинномозговой путь (tr. tectospinalis)","предверно-спинномозговые пути (tr. vestibulospinalis)","корково-спинномозговой путь (tr. corticospinalis)","крково-ядерный путь (tr. corticonuclearis)"],"correctAnswer":[0,1,2]},{"question":"Ассоциативные волокна полушарий головного мозга образуют:","options":["верхний продольный пучок (fasciculus longitudinalis superior)","нижний продольный пучок (fasciculus longitudinalis inferior)","дугообразные волокна большого мозга (fibrae arcuatae cerebri)","крючковидный пучок (fasciculus uncinatus)","медиальный продольный пучок (fasciculus longitudinalis medialis)"],"correctAnswer":[0,1,2,3]}]}};
+
+        let currentTest = null;
+        let testConfig = {
+            questionCount: 'all',
+            shuffleAnswers: false,
+            selectedQuestions: []
+        };
+        let userAnswers = [];
+        let currentQuestionIndex = 0;
+        let testQuestions = [];
+        let answeredQuestions = new Set();
+        let originalQuestionIndices = [];
+        let currentTheme = { color: 'red', mode: 'light' };
+
+        function setTheme(color, mode) {
+            document.body.className = '';
+
+            if (color === 'blue') {
+                document.body.classList.add('blue-mode');
+            } else if (color === 'green') {
+                document.body.classList.add('green-mode');
+            } else if (color === 'bw') {
+                document.body.classList.add('bw-mode');
+            }
+
+            if (mode === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+
+            currentTheme = { color, mode };
+            updateThemeButtons(color, mode);
+
+            // Save preference
+            localStorage.setItem('theme', JSON.stringify(currentTheme));
+        }
+
+        function loadTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved) {
+                const theme = JSON.parse(saved);
+                document.body.className = '';
+
+                if (theme.color === 'blue') {
+                    document.body.classList.add('blue-mode');
+                } else if (theme.color === 'green') {
+                    document.body.classList.add('green-mode');
+                } else if (theme.color === 'bw') {
+                    document.body.classList.add('bw-mode');
+                } else if (theme.color === 'red') {
+                    // Default red theme, no extra class needed
+                }
+
+                if (theme.mode === 'dark') {
+                    document.body.classList.add('dark-mode');
+                }
+
+                currentTheme = theme;
+                updateThemeButtons(theme.color, theme.mode);
+            } else {
+                // Default: black and white theme
+                document.body.className = 'bw-mode';
+                currentTheme = { color: 'bw', mode: 'light' };
+                updateThemeButtons('bw', 'light');
+            }
+        }
+
+        function updateThemeButtons(color, mode) {
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const buttons = document.querySelectorAll('.theme-btn');
+            if (color === 'red' && mode === 'light') buttons[0].classList.add('active');
+            else if (color === 'blue') buttons[1].classList.add('active');
+            else if (color === 'green') buttons[2].classList.add('active');
+            else if (color === 'bw') buttons[3].classList.add('active');
+            else if (color === 'red' && mode === 'dark') buttons[4].classList.add('active');
+        }
+
+        function initializeApp() {
+            loadTheme();
+
+            const select = document.getElementById("testSelect");
+            for (let key in testDatabase) {
+                const option = document.createElement("option");
+                option.value = key;
+                option.textContent = testDatabase[key].name;
+                select.appendChild(option);
+            }
+        }
+
+        function updateTestInfo() {
+            const testKey = document.getElementById("testSelect").value;
+            if (!testKey) {
+                document.getElementById("settingsSection").classList.add("hidden");
+                return;
+            }
+
+            currentTest = testDatabase[testKey];
+            document.getElementById("settingsSection").classList.remove("hidden");
+            setupSettings();
+        }
+
+        function setupSettings() {
+            const totalQuestions = currentTest.questions.length;
+            document.getElementById("totalQuestionsCount").textContent =
+                `Всего вопросов в тесте: ${totalQuestions}`;
+
+            // Инициализация input полей
+            const countInput = document.getElementById("questionCountInput");
+            const rangeEnd = document.getElementById("rangeEnd");
+
+            countInput.max = totalQuestions;
+            rangeEnd.max = totalQuestions;
+            rangeEnd.value = Math.min(5, totalQuestions);
+
+            // Инициализация переменных
+            testConfig.shuffleAnswers = false;
+            testConfig.questionCount = 'all';
+            testConfig.selectedQuestions = [];
+
+            document.getElementById("shuffleToggle").classList.remove("active");
+
+            // Список вопросов
+            setupQuestionList();
+        }
+
+        function switchMode(mode) {
+            const countMode = document.getElementById("countMode");
+            const rangeMode = document.getElementById("rangeMode");
+
+            if (mode === 'count') {
+                countMode.style.display = 'block';
+                rangeMode.style.display = 'none';
+            } else {
+                countMode.style.display = 'none';
+                rangeMode.style.display = 'block';
+            }
+        }
+
+        function setupQuestionList() {
+            const selector = document.getElementById("questionSelector");
+            selector.innerHTML = '';
+
+            currentTest.questions.forEach((q, idx) => {
+                const item = document.createElement("div");
+                item.className = "question-item";
+                item.innerHTML = `
+                    <input type="checkbox" id="q${idx}" checked onchange="updateSelectedQuestions()">
+                    <label for="q${idx}">${idx + 1}. ${q.question.substring(0, 50)}...</label>
+                `;
+                selector.appendChild(item);
+                testConfig.selectedQuestions[idx] = true;
+            });
+        }
+
+
+        function updateSelectedQuestions() {
+            testConfig.selectedQuestions = [];
+            document.querySelectorAll(".question-item input[type='checkbox']").forEach((cb, idx) => {
+                testConfig.selectedQuestions[idx] = cb.checked;
+            });
+        }
+
+        function toggleShuffle() {
+            testConfig.shuffleAnswers = !testConfig.shuffleAnswers;
+            document.getElementById("shuffleToggle").classList.toggle("active");
+        }
+
+
+        function startTest() {
+            if (!currentTest) {
+                alert("Пожалуйста, выберите тест");
+                return;
+            }
+
+            // Определяем режим выбора
+            const selectMode = document.querySelector("input[name='selectMode']:checked").value;
+            let questions = [];
+
+            if (selectMode === 'count') {
+                // Режим по количеству
+                const count = parseInt(document.getElementById("questionCountInput").value);
+
+                if (isNaN(count) || count < 1) {
+                    alert("Введите корректное количество вопросов");
+                    return;
+                }
+
+                if (count > currentTest.questions.length) {
+                    alert(`Вопросов не может быть больше ${currentTest.questions.length}`);
+                    return;
+                }
+
+                questions = currentTest.questions.slice(0, count);
+            } else {
+                // Режим по диапазону
+                const start = parseInt(document.getElementById("rangeStart").value) - 1;
+                const end = parseInt(document.getElementById("rangeEnd").value);
+
+                if (isNaN(start) || isNaN(end) || start < 0 || end > currentTest.questions.length || start >= end) {
+                    alert("Введите корректный диапазон вопросов");
+                    return;
+                }
+
+                questions = currentTest.questions.slice(start, end);
+            }
+
+            if (questions.length === 0) {
+                alert("Выберите хотя бы один вопрос");
+                return;
+            }
+
+            testQuestions = questions;
+            userAnswers = new Array(testQuestions.length).fill(null).map(() => []);
+            currentQuestionIndex = 0;
+            answeredQuestions = new Set();
+
+            // Save original indices from full database
+            originalQuestionIndices = [];
+            const allQuestions = currentTest.questions;
+            for (let i = 0; i < testQuestions.length; i++) {
+                for (let j = 0; j < allQuestions.length; j++) {
+                    if (testQuestions[i] === allQuestions[j]) {
+                        originalQuestionIndices.push(j + 1); // +1 for 1-based indexing
+                        break;
+                    }
+                }
+            }
+
+            document.getElementById("testSelector").classList.add("hidden");
+            document.getElementById("testScreen").classList.remove("hidden");
+            document.getElementById("resultsScreen").classList.add("hidden");
+
+            displayQuestion(0);
+        }
+
+        function displayQuestion(index) {
+            currentQuestionIndex = index;
+            const question = testQuestions[index];
+            const questionBlock = document.getElementById("questionBlock");
+
+            const progress = ((index + 1) / testQuestions.length) * 100;
+            document.getElementById("progressFill").style.width = progress + "%";
+
+            // Подсчитываем текущий процент правильности (включая текущий ответ если он дан)
+            let correctCount = 0;
+            let answeredCount = 0;
+            for (let i = 0; i <= index; i++) {
+                if (userAnswers[i] && userAnswers[i].length > 0) {
+                    answeredCount++;
+                    if (compareAnswers(userAnswers[i] || [], testQuestions[i].correctAnswer)) {
+                        correctCount++;
+                    }
+                }
+            }
+            const correctPercentage = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
+
+            const catalogNumber = originalQuestionIndices[index] || (index + 1);
+
+            document.getElementById("progressInfo").innerHTML = `
+                <span>Вопрос <span class="progress-item">${index + 1}</span> из <span class="progress-item">${testQuestions.length}</span> (каталог: <span class="progress-item">#${catalogNumber}</span>)</span>
+                <span>Прогресс: <span class="progress-item">${Math.round(progress)}%</span> | Правильно: <span class="progress-item">${correctPercentage}%</span> (${correctCount}/${answeredCount})</span>
+            `;
+
+            // Подготавливаем опции
+            let options = [...question.options];
+            if (testConfig.shuffleAnswers) {
+                options = shuffleArray(options);
+            }
+
+            let optionsHTML = '<div class="options">';
+            const isAnswered = answeredQuestions.has(index);
+
+            options.forEach((option, i) => {
+                const originalIndex = question.options.indexOf(option);
+                const isSelected = (userAnswers[index] || []).includes(originalIndex);
+                const isCorrect = question.correctAnswer.includes(originalIndex);
+
+                let optionClass = "";
+                let badge = "";
+
+                if (isAnswered) {
+                    if (isCorrect) {
+                        optionClass = " revealed-correct";
+                        badge = '<span class="correct-badge">✓</span>';
+                    } else if (isSelected && !isCorrect) {
+                        optionClass = " revealed-incorrect";
+                        badge = '<span class="incorrect-badge">✗</span>';
+                    }
+                }
+
+                optionsHTML += `
+                    <div class="option${optionClass}">
+                        <label>
+                            <input type="checkbox" name="answer" value="${originalIndex}" ${isSelected ? "checked" : ""} onchange="selectAnswer(${originalIndex})" ${isAnswered ? "disabled" : ""}>
+                            ${option}${badge}
+                        </label>
+                    </div>
+                `;
+            });
+            optionsHTML += '</div>';
+
+            // Добавляем сообщение о результате
+            let resultMessage = '';
+            if (isAnswered) {
+                const isCorrect = compareAnswers(userAnswers[index] || [], question.correctAnswer);
+                if (isCorrect) {
+                    resultMessage = '<div style="background: #f1f8f4; border: 2px solid #4caf50; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center;"><span style="color: #4caf50; font-weight: 600; font-size: 1.1em;">✓ Правильно!</span></div>';
+                } else {
+                    resultMessage = '<div style="background: #fef1f0; border: 2px solid #f44336; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center;"><span style="color: #f44336; font-weight: 600; font-size: 1.1em;">✗ Неправильно</span></div>';
+                }
+            }
+
+            let buttonHTML = `
+                <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
+                    ${index > 0 ? `<button class="btn btn-back" onclick="displayQuestion(${index - 1})">← Предыдущий</button>` : ''}
+                    <button class="btn btn-submit" onclick="answerQuestion()">✓ Ответить</button>
+                    ${index < testQuestions.length - 1 ? `<button class="btn btn-submit" onclick="displayQuestion(${index + 1})">Следующий →</button>` : `<button class="btn btn-submit" onclick="submitTest()" style="background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);">Завершить тест</button>`}
+                </div>
+            `;
+
+            questionBlock.innerHTML = `
+                <div class="question-title">Вопрос ${index + 1}: ${question.question}</div>
+                ${resultMessage}
+                ${optionsHTML}
+                ${buttonHTML}
+            `;
+        }
+
+        function selectAnswer(answerIndex) {
+            if (!userAnswers[currentQuestionIndex]) {
+                userAnswers[currentQuestionIndex] = [];
+            }
+
+            const answers = userAnswers[currentQuestionIndex];
+            const idx = answers.indexOf(answerIndex);
+
+            if (idx > -1) {
+                answers.splice(idx, 1);
+            } else {
+                answers.push(answerIndex);
+            }
+
+            userAnswers[currentQuestionIndex] = answers;
+        }
+
+        function answerQuestion() {
+            const answers = userAnswers[currentQuestionIndex];
+            if (!answers || answers.length === 0) {
+                alert("Пожалуйста, выберите хотя бы один ответ");
+                return;
+            }
+
+            answeredQuestions.add(currentQuestionIndex);
+            displayQuestion(currentQuestionIndex);
+        }
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function submitTest() {
+            // Проверяем что все вопросы отвечены
+            for (let i = 0; i < userAnswers.length; i++) {
+                if (!userAnswers[i] || userAnswers[i].length === 0) {
+                    alert("Пожалуйста, ответьте на все вопросы");
+                    return;
+                }
+            }
+
+            showResults();
+        }
+
+        function compareAnswers(userAnswers, correctAnswers) {
+            if (userAnswers.length !== correctAnswers.length) return false;
+            const sorted1 = [...userAnswers].sort();
+            const sorted2 = [...correctAnswers].sort();
+            return sorted1.every((val, idx) => val === sorted2[idx]);
+        }
+
+        function getGrade(percentage) {
+            if (percentage === 100) return { text: "тест выучен и усвоен", emoji: "🏆" };
+            if (percentage >= 91) return { text: "тест выучен и усвоен", emoji: "🏆" };
+            if (percentage >= 81) return { text: "мощь", emoji: "💪" };
+            if (percentage >= 61) return { text: "милота", emoji: "😊" };
+            if (percentage >= 60) return { text: "порог пройден", emoji: "✅" };
+            if (percentage >= 40) return { text: "чуть чуть", emoji: "😐" };
+            if (percentage >= 21) return { text: "тебе надо тренироваться", emoji: "📚" };
+            return { text: "х****во братан", emoji: "😬" };
+        }
+
+        function showResults() {
+            let correct = 0;
+            const answers = [];
+
+            testQuestions.forEach((question, index) => {
+                const isCorrect = compareAnswers(userAnswers[index] || [], question.correctAnswer);
+                if (isCorrect) correct++;
+
+                const userAnswerTexts = (userAnswers[index] || []).map(idx => question.options[idx]);
+                const correctAnswerTexts = question.correctAnswer.map(idx => question.options[idx]);
+
+                answers.push({
+                    question: question.question,
+                    userAnswers: userAnswerTexts,
+                    correctAnswers: correctAnswerTexts,
+                    isCorrect: isCorrect
+                });
+            });
+
+            const total = testQuestions.length;
+            const incorrect = total - correct;
+            const percentage = Math.round((correct / total) * 100);
+            const grade = getGrade(percentage);
+
+            document.getElementById("testScreen").classList.add("hidden");
+            document.getElementById("resultsScreen").classList.remove("hidden");
+
+            document.getElementById("scoreCircle").textContent = percentage + "%";
+            document.getElementById("correctCount").textContent = correct;
+            document.getElementById("incorrectCount").textContent = incorrect;
+            document.getElementById("totalCount").textContent = total;
+
+            // Add grade message
+            const resultsDetails = document.querySelector(".results-details");
+            const gradeDiv = document.createElement("div");
+            gradeDiv.style.cssText = "margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; border-left: 4px solid var(--primary-color);";
+            gradeDiv.innerHTML = `<p style="font-size: 1.2em; margin: 0;"><span style="font-size: 1.5em;">${grade.emoji}</span> <strong>${grade.text}</strong></p>`;
+            resultsDetails.appendChild(gradeDiv);
+
+            let reviewHTML = '<div class="answer-review-title">Подробный разбор ответов:</div>';
+            answers.forEach((answer, index) => {
+                const statusClass = answer.isCorrect ? "correct" : "incorrect";
+                const statusIcon = answer.isCorrect ? "✓" : "✗";
+                const statusText = answer.isCorrect ? "Правильно" : "Неправильно";
+
+                const userAnswersStr = answer.userAnswers.join(", ");
+                const correctAnswersStr = answer.correctAnswers.join(", ");
+
+                reviewHTML += `
+                    <div class="answer-item ${statusClass}">
+                        <div class="answer-item-question">${index + 1}. ${answer.question}</div>
+                        <div class="answer-item-info">
+                            <span class="answer-${answer.isCorrect ? 'correct' : 'incorrect'}">${statusIcon} ${statusText}</span><br>
+                            Ваши ответы: <strong>${userAnswersStr}</strong><br>
+                            Правильные ответы: <span class="answer-correct"><strong>${correctAnswersStr}</strong></span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById("answerReview").innerHTML = reviewHTML;
+        }
+
+        function goBack() {
+            document.getElementById("testSelector").classList.remove("hidden");
+            document.getElementById("testScreen").classList.add("hidden");
+            document.getElementById("resultsScreen").classList.add("hidden");
+            currentTest = null;
+            userAnswers = [];
+        }
+
+        function restartTest() {
+            startTest();
+        }
+
+        window.addEventListener("load", initializeApp);
+    </script>
+</body>
+</html>
