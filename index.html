@@ -70,6 +70,29 @@
             --bg-color: #ffffff;
         }
 
+        body.purple-mode {
+            --primary-color: #9C27B0;
+            --dark-primary: #6A1B9A;
+            --bg-gradient-1: #6A1B9A;
+            --bg-gradient-2: #7B1FA2;
+        }
+
+        .easter-egg {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 6px;
+            color: rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+            font-family: monospace;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .easter-egg.show {
+            opacity: 1;
+        }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -82,17 +105,26 @@
         .header {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-primary) 100%);
             color: white;
-            padding: 40px 20px;
+            padding: 20px 20px;
             text-align: center;
-            position: relative;
+        }
+
+        .header-title {
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
         }
 
         .theme-selector {
-            position: absolute;
-            top: 10px;
-            right: 15px;
             display: flex;
             gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .theme-btn {
@@ -396,36 +428,76 @@
             box-shadow: 0 5px 15px rgba(211, 47, 47, 0.2);
         }
 
+        /* Кастомные чекбоксы */
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            border: 2px solid #999;
+            border-radius: 4px;
+            background: white;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            position: relative;
+            margin-right: 12px;
+        }
+
+        input[type="checkbox"]:checked {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        input[type="checkbox"]:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .option.revealed-correct {
-            border-color: #4caf50;
-            background: #f1f8f4;
+            border-color: var(--primary-color);
+            background: rgba(211, 47, 47, 0.1);
+        }
+
+        .option.revealed-correct input[type="checkbox"]:checked {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
         }
 
         .option.revealed-incorrect {
-            border-color: #f44336;
-            background: #fef1f0;
+            border-color: #ccc;
+            background: #f5f5f5;
+            opacity: 0.7;
+        }
+
+        .option.revealed-incorrect input[type="checkbox"] {
+            border-color: #999;
+            background: white;
+        }
+
+        .option.revealed-incorrect input[type="checkbox"]:checked {
+            background: #999;
+            border-color: #999;
         }
 
         .correct-badge {
-            display: inline-block;
-            background: #4caf50;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 0.8em;
-            margin-left: 10px;
-            font-weight: 600;
+            display: none;
         }
 
         .incorrect-badge {
-            display: inline-block;
-            background: #f44336;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 0.8em;
-            margin-left: 10px;
-            font-weight: 600;
+            display: none;
         }
 
         .option input[type="radio"] {
@@ -912,15 +984,18 @@
 <body>
     <div class="container">
         <div class="header">
+            <div class="header-title">
+                <h1>417 Metrics</h1>
+                <p>Система тестирования знаний</p>
+            </div>
             <div class="theme-selector">
                 <button class="theme-btn" onclick="setTheme('red', 'light')">Красная</button>
                 <button class="theme-btn" onclick="setTheme('blue', 'light')">Синяя</button>
                 <button class="theme-btn" onclick="setTheme('green', 'light')">Зеленая</button>
                 <button class="theme-btn active" onclick="setTheme('bw', 'light')">Ч/Б</button>
+                <button class="theme-btn" onclick="setTheme('purple', 'light')">Фиолет</button>
                 <button class="theme-btn" onclick="setTheme('red', 'dark')">Темная</button>
             </div>
-            <h1>417 Metrics</h1>
-            <p>Система тестирования знаний</p>
         </div>
 
         <div class="content">
@@ -1052,6 +1127,8 @@
                 document.body.classList.add('green-mode');
             } else if (color === 'bw') {
                 document.body.classList.add('bw-mode');
+            } else if (color === 'purple') {
+                document.body.classList.add('purple-mode');
             }
 
             if (mode === 'dark') {
@@ -1061,8 +1138,24 @@
             currentTheme = { color, mode };
             updateThemeButtons(color, mode);
 
+            // Easter egg for purple theme
+            const easterEgg = document.querySelector('.easter-egg') || createEasterEgg();
+            if (color === 'purple') {
+                easterEgg.classList.add('show');
+            } else {
+                easterEgg.classList.remove('show');
+            }
+
             // Save preference
             localStorage.setItem('theme', JSON.stringify(currentTheme));
+        }
+
+        function createEasterEgg() {
+            const egg = document.createElement('div');
+            egg.className = 'easter-egg';
+            egg.textContent = 'for @linaidk';
+            document.body.appendChild(egg);
+            return egg;
         }
 
         function loadTheme() {
@@ -1105,7 +1198,8 @@
             else if (color === 'blue') buttons[1].classList.add('active');
             else if (color === 'green') buttons[2].classList.add('active');
             else if (color === 'bw') buttons[3].classList.add('active');
-            else if (color === 'red' && mode === 'dark') buttons[4].classList.add('active');
+            else if (color === 'purple') buttons[4].classList.add('active');
+            else if (color === 'red' && mode === 'dark') buttons[5].classList.add('active');
         }
 
         function initializeApp() {
